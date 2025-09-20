@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <EmptyListsPage />
+    <ListsPage />
   </v-app>
 </template>
 

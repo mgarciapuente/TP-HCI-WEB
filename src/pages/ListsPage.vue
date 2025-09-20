@@ -76,7 +76,7 @@
           <div class="lists-layout">
             <!-- Panel izquierdo: Lista de listas -->
             <div class="lists-panel">
-              <h3 class="panel-title">Listas</h3>
+              <h2 class="panel-title">Listas</h2>
               <div class="lists-scroll">
                 <v-card
                   v-for="list in listItems"
@@ -237,23 +237,27 @@ const navigateTo = (tab: string) => {
 .lists-layout {
   display: flex;
   height: 100%;
-  gap: 1rem;
+  gap: 0;
 }
 
 .lists-panel {
-  flex: 0 0 300px;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  padding: 0.25em 1em 0.25em 1em; 
+  border-right: 1px solid #e0e0e0;
 }
 
 .products-panel {
   flex: 1;
   display: flex;
   flex-direction: column;
+  padding-left: 1rem;
 }
 
 .panel-title {
   margin-bottom: 1rem;
+  padding: 1rem;
   color: #333;
   font-weight: 500;
 }
