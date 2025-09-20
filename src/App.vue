@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import EmptyListsPage from './pages/EmptyListsPage.vue'
+import ListsPage from './pages/ListsPage.vue'
 </script>
 
 <style>
