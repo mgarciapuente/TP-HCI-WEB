@@ -1,63 +1,8 @@
+
+
+
 <template>
-  <!-- Navigation Bar -->
-  <v-app-bar 
-    color="primary" 
-    elevation="2"
-  >
-    <v-app-bar-title class="text-buttons font-weight-medium">
-      Canasta
-    </v-app-bar-title>
-
-    <v-spacer></v-spacer>
-
-    <!-- Navegación del header -->
-    <v-btn 
-      variant="text" 
-      color="buttons"
-      class="text-none normal-case"
-      :style="{ textDecoration: activeTab === 'almacen' ? 'underline' : 'none' }"
-      @click="navigateTo('almacen')"
-    >
-      Almacén
-    </v-btn>
-
-    <v-btn
-      variant="text"
-      color="buttons"
-      class="text-none normal-case"
-      :style="{ textDecoration: activeTab === 'listas' ? 'underline' : 'none' }"
-      @click="navigateTo('listas')"
-    >
-      Listas
-    </v-btn>
-    
-    <v-btn 
-      variant="text"
-      color="buttons"
-      class="text-none normal-case"
-      :style="{ textDecoration: activeTab === 'productos' ? 'underline' : 'none' }"
-      @click="navigateTo('productos')"
-    >
-      Productos
-    </v-btn>
-    
-    <v-btn 
-      variant="text" 
-      color="buttons"
-      class="text-none normal-case"
-      :style="{ textDecoration: activeTab === 'perfil' ? 'underline' : 'none' }"
-      @click="navigateTo('perfil')"
-    >
-      Perfil
-    </v-btn>
-  </v-app-bar>
-
-  <v-main>
-    <div class="main-container">
-      <v-card 
-        class="main-card"
-        rounded="lg"
-      >
+   
         <!-- Cuando no hay listas (lists === 0) -->
         <div v-if="lists === 0" class="empty-state">
           <div class="empty-content">
@@ -123,9 +68,7 @@
           @click="createNewList"
         >
         </v-btn>
-      </v-card>
-    </div>
-  </v-main>
+      
 </template>
 
 <script setup lang="ts">
@@ -138,7 +81,7 @@ interface Lista {
   products: any[]
 }
 
-const activeTab = ref('listas') // Por defecto está en listas ya que es la página actual
+
 const lists = ref(0) // Variable para contar la cantidad de listas
 const selectedList = ref<Lista | null>(null) // Lista actualmente seleccionada
 const listItems = ref<Lista[]>([]) // Array que contendrá las listas
@@ -152,44 +95,10 @@ const createNewList = () => {
   })
 }
 
-const navigateTo = (tab: string) => {
-  activeTab.value = tab
-  
-  // Aquí puedes agregar la lógica de navegación según tu estructura de rutas
-  switch (tab) {
-    case 'almacen':
-      console.log('Navegar a almacén')
-      break
-    case 'listas':
-      console.log('Navegar a listas')
-      break
-    case 'productos':
-      console.log('Navegar a productos')
-      break
-    case 'perfil':
-      console.log('Navegar a perfil')
-      break
-  }
-}
+
 </script>
 
 <style scoped>
-.normal-case {
-  text-transform: none !important;
-}
-
-.main-container {
-  padding: 16px;
-  height: calc(100vh - 64px);
-}
-
-.main-card {
-  height: calc(100% - 0px);
-  width: 100%;
-  position: relative;
-  background-color: rgb(235, 238, 235);
-}
-
 .fab-button {
   position: absolute;
   bottom: 0.5em;
