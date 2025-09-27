@@ -1,10 +1,7 @@
 <template>
   <v-app>
     <!-- Navigation Bar siempre presente -->
-    <NavigationBar 
-      :active-tab="activeTab" 
-      @navigate="handleNavigation" 
-    />
+    <NavigationBar />
     
     <!-- Contenido principal que cambia según la página -->
     <v-main>
@@ -20,32 +17,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import NavigationBar from '../components/NavigationBar.vue'
-
-const activeTab = ref('listas') // Por defecto
-
-const handleNavigation = (tab: string) => {
-  activeTab.value = tab
-  
-  // Aquí puedes agregar la lógica de navegación según tu estructura de rutas
-  switch (tab) {
-    case 'almacen':
-      console.log('Navegar a almacén')
-      break
-    case 'listas':
-      console.log('Navegar a listas')
-      break
-    case 'productos':
-      console.log('Navegar a productos')
-      break
-    case 'perfil':
-      console.log('Navegar a perfil')
-      break
-  }
-}
 </script>
-
 
 <style scoped>
 .main-container {
