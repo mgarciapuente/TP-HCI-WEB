@@ -13,6 +13,14 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Color palette (custom) */
+  --color-orange: #F5844E;
+  --color-orange-hover: #F79B66; /* lighter orange for hover */
+  --color-orange-light: #F9A877; /* even lighter for chip style */
+  --color-green-dark: #465D46;
+  --color-green-mid: #7A9A7A;
+  --color-green-light: #DCE5DC;
 }
 
 a {

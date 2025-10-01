@@ -3,9 +3,12 @@
     color="primary" 
     elevation="2"
   >
-    <v-app-bar-title class="text-buttons font-weight-medium">
-      Canasta
-    </v-app-bar-title>
+    <div class="navbar-title-container">
+  <img src="@/assets/logo.png" alt="Logo" class="navbar-logo" height="32" />
+      <v-app-bar-title class="text-buttons font-weight-medium navbar-title-text">
+        Canasta
+      </v-app-bar-title>
+    </div>
 
     <v-spacer></v-spacer>
 
@@ -73,6 +76,21 @@ const isActive = (path: string) => {
   outline: none !important;
   border: none !important;
   box-shadow: none !important;
+}
+
+.navbar-title-container {
+  display: flex;
+  align-items: center;
+}
+.navbar-logo {
+  vertical-align: middle;
+  margin-left: 16px;
+  margin-right: 12px;
+}
+.navbar-title-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
 }
 
 /* Estados hover, focus, active para los botones */
