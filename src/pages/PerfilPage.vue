@@ -1,31 +1,22 @@
 <template>
-  <div class="perfil-page">
-    <h1>Perfil</h1>
-    <p>Configura tu perfil y preferencias.</p>
-    
-    <!-- Placeholder para el contenido del perfil -->
-    <div class="content-placeholder">
-      <v-icon size="64" color="grey">mdi-account-circle</v-icon>
-      <h3>Configuración de perfil en desarrollo</h3>
-    </div>
+  <h1 class="perfil-title">Perfil</h1>
+  <div>
+    <UserProfile v-if="authStore.isLoggedIn" />
+    <LoginForm v-else />
   </div>
 </template>
 
 <script setup lang="ts">
-// Lógica del perfil aquí
+import { useAuthStore } from '../stores/auth'
+import UserProfile from '../components/UserProfile.vue'
+import LoginForm from '../components/LoginForm.vue'
+
+const authStore = useAuthStore()
 </script>
 
 <style scoped>
-.perfil-page {
-  padding: 20px;
-}
 
-.content-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 300px;
-  color: #666;
+.perfil-title{
+  margin: 0.5em 0.5em;
 }
 </style>
