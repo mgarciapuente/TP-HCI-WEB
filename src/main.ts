@@ -5,6 +5,9 @@ import App from './App.vue'
 import vuetify from './plugins/vuetify'
 import router from './router'
 
+// Vuetify global styles (required)
+import 'vuetify/styles'
+
 const pinia = createPinia()
 
 createApp(App)

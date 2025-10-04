@@ -17,10 +17,10 @@
       variant="text" 
       color="buttons"
       class="text-none normal-case nav-button"
-      :class="{ 'active-nav': isActive('/almacen') }"
-      @click="$router.push('/almacen')"
+      :class="{ 'active-nav': isActive('/inicio') }"
+      @click="$router.push('/inicio')"
     >
-      Almacén
+      Inicio
     </v-btn>
 
     <v-btn

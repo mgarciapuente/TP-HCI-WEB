@@ -11,6 +11,7 @@ export default createVuetify({
           secondary: '#F5844E',
           surface: '#F6F8F7',
           background: '#F5F5F5',
+          backgroundColor: '#EBEEEB',
           buttons: '#FCFBF8',
           titles: '#333333',
         },

@@ -1,23 +1,23 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import ListsPage from '../pages/ListsPage.vue'
-import AlmacenPage from '../pages/AlmacenPage.vue'
+
 import ProductosPage from '../pages/ProductosPage.vue'
 import PerfilPage from '../pages/PerfilPage.vue'
 
 const routes = [
   {
     path: '/',
-    redirect: '/listas'
+    redirect: '/inicio'
+  },
+  {
+    path: '/inicio',
+    name: 'inicio',
+    component: () => import('../pages/InitPage.vue')
   },
   {
     path: '/listas',
     name: 'listas',
     component: ListsPage
-  },
-  {
-    path: '/almacen',
-    name: 'almacen', 
-    component: AlmacenPage
   },
   {
     path: '/productos',
