@@ -23,14 +23,14 @@ import NavigationBar from '../components/NavigationBar.vue'
 <style scoped>
 .main-container {
   padding: 16px;
-  height: calc(100vh - 64px);
+  min-height: calc(100vh - 64px);
 }
 
 .main-card { 
-  height: calc(100% - 0px);
+  min-height: calc(100vh - 96px);
   width: 100%;
   position: relative;
-  background-color: rgb(235, 238, 235);
+  background-color: transparent;
   border-radius: 16px;
 }
 </style>
