@@ -4,16 +4,27 @@
     elevation="2"
   >
     <div class="navbar-title-container">
-  <img src="@/assets/logo.png" alt="Logo" class="navbar-logo" height="32" />
+      <img src="@/assets/logo.png" alt="Logo" class="navbar-logo" height="32" />
       <v-app-bar-title class="text-buttons font-weight-medium navbar-title-text">
         Canasta
       </v-app-bar-title>
+      <!-- Indicator de modo bypass -->
+      <v-chip 
+        v-if="showBypassIndicator"
+        size="x-small" 
+        color="orange"
+        variant="elevated"
+        class="bypass-indicator"
+      >
+        DEV
+      </v-chip>
     </div>
 
     <v-spacer></v-spacer>
 
     <!-- Navegación del header -->
     <v-btn 
+      v-if="!authStore.isLoggedIn"
       variant="text" 
       color="buttons"
       class="text-none normal-case nav-button"
@@ -58,12 +69,17 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { useAuthStore } from '../stores/auth'
+import { DEV_CONFIG } from '../config/dev'
 
 const route = useRoute()
+const authStore = useAuthStore()
 
 const isActive = (path: string) => {
   return computed(() => route.path === path).value
 }
+
+const showBypassIndicator = computed(() => DEV_CONFIG.BYPASS_AUTH)
 </script>
 
 <style scoped>
@@ -81,6 +97,7 @@ const isActive = (path: string) => {
 .navbar-title-container {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 .navbar-logo {
   vertical-align: middle;
@@ -91,6 +108,12 @@ const isActive = (path: string) => {
   font-size: 1.5rem;
   font-weight: bold;
   color: #fff;
+}
+
+.bypass-indicator {
+  margin-left: 8px;
+  font-size: 10px;
+  height: 20px;
 }
 
 /* Estados hover, focus, active para los botones */

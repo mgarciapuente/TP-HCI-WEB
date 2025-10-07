@@ -23,14 +23,14 @@
           <v-btn
             size="large"
             style="background-color: #465D46; color: white; border-radius: 12px; padding: 12px 28px;min-width: 180px;"
-            to="/listas"
+            to="/auth/login"
           >
             Crear lista ahora 
           </v-btn>
           <v-btn
             size="large"
             style="background-color: #F5844E; color: white; border-radius: 12px; padding: 12px 28px;min-width: 180px;"
-            to="/productos"
+            to="/auth/login"
           >
             ver productos
           </v-btn>

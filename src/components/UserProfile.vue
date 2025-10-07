@@ -2,13 +2,16 @@
   <div class="profile-container">
     <!-- Información del usuario -->
     <div class="profile-info">
-      <img 
-        :src="authStore.user?.avatar || defaultAvatar"
-        class="profile-avatar"
-        :alt="authStore.user?.name || 'Usuario'"
-      />
-      <p class="perfil-name">{{ authStore.user?.name }}</p>
+      <div class="profile-avatar-container">
+        <v-avatar size="100" style="margin-bottom: 16px;">
+          <v-icon size="60" color="#465D46">mdi-account-circle</v-icon>
+        </v-avatar>
+      </div>
+      <h2 class="perfil-name">{{ fullName }}</h2>
       <p class="perfil-email">{{ authStore.user?.email }}</p>
+      <p class="perfil-date" v-if="authStore.user?.createdAt">
+        Miembro desde {{ formatDate(authStore.user.createdAt) }}
+      </p>
     </div>
     
     <!-- Grilla de botones 2x2 -->
@@ -19,7 +22,9 @@
             variant="outlined" 
             block 
             class="grid-button"
+            style="border-color: #465D46; color: #465D46;"
           >
+            <v-icon start>mdi-cog</v-icon>
             Configuración
           </v-btn>
         </v-col>
@@ -28,8 +33,10 @@
             variant="outlined" 
             block 
             class="grid-button"
+            style="border-color: #465D46; color: #465D46;"
           >
-            Configuración de Alacena
+            <v-icon start>mdi-home-variant</v-icon>
+            Alacena
           </v-btn>
         </v-col>
       </v-row>
@@ -40,7 +47,9 @@
             variant="outlined" 
             block 
             class="grid-button"
+            style="border-color: #465D46; color: #465D46;"
           >
+            <v-icon start>mdi-translate</v-icon>
             Idioma
           </v-btn>
         </v-col>
@@ -49,7 +58,9 @@
             variant="outlined" 
             block 
             class="grid-button"
+            style="border-color: #465D46; color: #465D46;"
           >
+            <v-icon start>mdi-pencil</v-icon>
             Editar perfil
           </v-btn>
         </v-col>
@@ -57,18 +68,65 @@
     </v-container>
     
     <!-- Botón de logout -->
-    <v-btn @click="authStore.logout()" class="logout-button">
+    <v-btn 
+      @click="handleLogout" 
+      class="logout-button"
+      :loading="loggingOut"
+      block
+      size="large"
+      style="background-color: #F5844E; color: white; border-radius: 12px; margin-top: 16px;"
+    >
+      <v-icon start>mdi-logout</v-icon>
       Cerrar sesión
     </v-btn>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
+const router = useRouter()
+const loggingOut = ref(false)
 
-const defaultAvatar = 'https://img.freepik.com/vector-premium/perfil-hombre-dibujos-animados_18591-58483.jpg'
+// Computed para el nombre completo
+const fullName = computed(() => {
+  if (authStore.user?.name && authStore.user?.surname) {
+    return `${authStore.user.name} ${authStore.user.surname}`
+  }
+  return authStore.user?.name || 'Usuario'
+})
+
+// Función para formatear fecha
+const formatDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('es-ES', { 
+      year: 'numeric', 
+      month: 'long' 
+    })
+  } catch {
+    return 'Fecha no disponible'
+  }
+}
+
+// Manejar logout
+const handleLogout = async () => {
+  loggingOut.value = true
+  try {
+    await authStore.logout()
+    // Redirigir a la página de inicio después del logout
+    router.push('/inicio')
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error)
+    // Incluso si hay error, redirigir (el logout local ya se hizo)
+    router.push('/inicio')
+  } finally {
+    loggingOut.value = false
+  }
+}
 </script>
 
 <style scoped>
