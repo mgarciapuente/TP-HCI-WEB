@@ -12,7 +12,7 @@ import type {
   PasswordReset,
   VerificationCode,
   ApiError 
-} from '../types/userTypes' //deberia poner types solo pues tengo el index.ts que reexporta todo
+} from '../types'
 import { API_CONFIG, createAuthHeaders, createApiUrl } from './apiConfig'
 
 // Clase de error personalizada para la API
