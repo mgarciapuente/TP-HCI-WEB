@@ -93,7 +93,7 @@
     </div>
   
     <!-- Footer -->
-    <div style="background-color: #465D46; color: white; padding: 40px 20px;">
+    <div style="color: white; padding: 40px 20px;" class="bg-primary">
       <div style="width:100%; max-width:800px; margin: 0 auto; text-align:center;">
         <!-- Enlaces del footer -->
         <div class="d-flex justify-center" style="gap: 32px; margin-bottom: 24px; flex-wrap: wrap;">
@@ -118,3 +118,9 @@
 import carritoImagen from '@/assets/carrito animado.png'
 
 </script>
+
+<style scoped>
+#a {
+  background-color: var(--v-theme-primary);
+}
+</style>

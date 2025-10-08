@@ -8,16 +8,6 @@
       <v-app-bar-title class="text-buttons font-weight-medium navbar-title-text">
         Canasta
       </v-app-bar-title>
-      <!-- Indicator de modo bypass -->
-      <v-chip 
-        v-if="showBypassIndicator"
-        size="x-small" 
-        color="orange"
-        variant="elevated"
-        class="bypass-indicator"
-      >
-        DEV
-      </v-chip>
     </div>
 
     <v-spacer></v-spacer>
@@ -70,7 +60,6 @@
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import { useAuthStore } from '../stores/auth'
-import { DEV_CONFIG } from '../config/dev'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -79,7 +68,6 @@ const isActive = (path: string) => {
   return computed(() => route.path === path).value
 }
 
-const showBypassIndicator = computed(() => DEV_CONFIG.BYPASS_AUTH)
 </script>
 
 <style scoped>

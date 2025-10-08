@@ -1,17 +1,17 @@
 // Servicio para manejar las operaciones de usuario con la API
 
-import type { 
-  RegistrationData, 
-  Credentials, 
-  AuthenticationToken, 
-  GetUser, 
-  NewUser, 
+import type {
+  RegistrationData,
+  Credentials,
+  AuthenticationToken,
+  GetUser,
+  NewUser,
   UpdateUserProfile,
   PasswordChange,
   PasswordRecovery,
   PasswordReset,
   VerificationCode,
-  ApiError 
+  ApiError
 } from '../types'
 import { API_CONFIG, createAuthHeaders, createApiUrl } from './apiConfig'
 
@@ -30,34 +30,34 @@ export class ApiException extends Error {
 const handleApiResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
     let errorMessage = 'Error en la solicitud'
-    
+
     try {
       const errorData: ApiError = await response.json()
       errorMessage = errorData.message || `Error ${response.status}`
     } catch {
       errorMessage = `Error ${response.status}: ${response.statusText}`
     }
-    
+
     throw new ApiException(response.status, errorMessage)
   }
-  
+
   return await response.json()
 }
 
 // Servicio de usuario
 export const userService = {
-  
+
   // Registrar nuevo usuario
   async register(userData: RegistrationData): Promise<NewUser> {
     const response = await fetch(
       createApiUrl(API_CONFIG.ENDPOINTS.USERS.REGISTER),
       {
         method: 'POST',
-        headers: API_CONFIG.DEFAULT_HEADERS, 
+        headers: API_CONFIG.DEFAULT_HEADERS,
         body: JSON.stringify(userData)
       }
     )
-    
+
     return handleApiResponse<NewUser>(response)
   },
 
@@ -71,7 +71,7 @@ export const userService = {
         body: JSON.stringify(credentials)
       }
     )
-    
+
     return handleApiResponse<AuthenticationToken>(response)
   },
 
@@ -84,7 +84,7 @@ export const userService = {
         headers: createAuthHeaders(token)
       }
     )
-    
+
     return handleApiResponse<GetUser>(response)
   },
 
@@ -98,7 +98,7 @@ export const userService = {
         body: JSON.stringify(profileData)
       }
     )
-    
+
     return handleApiResponse<GetUser>(response)
   },
 
@@ -112,26 +112,27 @@ export const userService = {
         body: JSON.stringify(verificationData)
       }
     )
-    
+
     if (!response.ok) {
       throw new ApiException(response.status, 'Error al verificar la cuenta')
     }
   },
 
   // Enviar código de verificación
-  async sendVerificationCode(email: string): Promise<void> {
+  async sendVerificationCode(email: string): Promise<VerificationCode> {
     const response = await fetch(
-      createApiUrl(API_CONFIG.ENDPOINTS.USERS.SEND_VERIFICATION),
+      createApiUrl(API_CONFIG.ENDPOINTS.USERS.SEND_VERIFICATION) + `?email=${encodeURIComponent(email)}`,
       {
         method: 'POST',
         headers: API_CONFIG.DEFAULT_HEADERS,
-        body: new URLSearchParams({ email })
       }
     )
-    
+
     if (!response.ok) {
       throw new ApiException(response.status, 'Error al enviar código de verificación')
     }
+
+    return response.json();
   },
 
   // Solicitar recuperación de contraseña
@@ -144,7 +145,7 @@ export const userService = {
         body: new URLSearchParams({ email: recoveryData.email })
       }
     )
-    
+
     if (!response.ok) {
       throw new ApiException(response.status, 'Error al solicitar recuperación de contraseña')
     }
@@ -160,7 +161,7 @@ export const userService = {
         body: JSON.stringify(resetData)
       }
     )
-    
+
     if (!response.ok) {
       throw new ApiException(response.status, 'Error al resetear la contraseña')
     }
@@ -176,7 +177,7 @@ export const userService = {
         body: JSON.stringify(passwordData)
       }
     )
-    
+
     if (!response.ok) {
       throw new ApiException(response.status, 'Error al cambiar la contraseña')
     }
@@ -191,7 +192,7 @@ export const userService = {
         headers: createAuthHeaders(token)
       }
     )
-    
+
     if (!response.ok) {
       throw new ApiException(response.status, 'Error al cerrar sesión')
     }
