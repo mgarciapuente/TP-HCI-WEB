@@ -60,6 +60,7 @@
       @product-updated="handleProductUpdated"
     />
   </div>
+
 </template>
 
 <script setup lang="ts">
