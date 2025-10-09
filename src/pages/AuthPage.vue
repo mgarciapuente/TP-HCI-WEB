@@ -106,6 +106,13 @@ const handleLogin = async () => {
     // Guardar en el store
     authStore.setAuth(userProfile, authResponse.token)
 
+    // Verificar si el usuario necesita datos iniciales
+    try {
+      await userService.checkAndInitializeUserData(authResponse.token)
+    } catch (error) {
+      console.warn('No se pudieron inicializar los datos del usuario:', error)
+    }
+
     // Redirigir al perfil
     router.push('/perfil')
   } catch (error) {
@@ -124,11 +131,11 @@ const handleRegister = async () => {
   }
 
   try {
-    // Llamar al servicio de registro
-    await userService.register(registrationData)
+    // Llamar al servicio de registro CON inicialización automática
+    await userService.registerWithInitialization(registrationData)
 
     // Mostrar mensaje de éxito
-    successMessage.value = 'Cuenta creada exitosamente. Ahora puedes iniciar sesión.'
+    successMessage.value = 'Cuenta creada exitosamente. ¡Ya puedes comenzar a usar Canasta!'
 
     const code = await userService.sendVerificationCode(registrationData.email);
 
