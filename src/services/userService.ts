@@ -14,6 +14,7 @@ import type {
   ApiError
 } from '../types'
 import { API_CONFIG, createAuthHeaders, createApiUrl } from './apiConfig'
+import { userInitializationService } from './userInitializationService'
 
 // Clase de error personalizada para la API
 export class ApiException extends Error {
@@ -195,6 +196,39 @@ export const userService = {
 
     if (!response.ok) {
       throw new ApiException(response.status, 'Error al cerrar sesión')
+    }
+  },
+
+  // Registrar nuevo usuario (sin inicialización, se hace en el login)
+  async registerWithInitialization(userData: RegistrationData): Promise<NewUser> {
+    console.log('🔴 REGISTRANDO USUARIO (inicialización en login)', userData.email)
+    try {
+      // Solo registrar el usuario, la inicialización se hace en el primer login
+      const newUser = await this.register(userData)
+      console.log('🔴 Usuario registrado exitosamente. Datos se inicializarán en primer login.')
+      
+      return newUser
+      
+    } catch (error) {
+      console.error('❌ Error durante el registro del usuario:', error)
+      throw error
+    }
+  },
+
+  // Verificar e inicializar datos si es necesario (para usuarios existentes)
+  async checkAndInitializeUserData(token: string): Promise<boolean> {
+    try {
+      const hasData = await userInitializationService.checkIfUserHasData(token)
+      
+      if (!hasData) {
+        console.log('� Creando datos iniciales para aplicación...')
+        return await userInitializationService.initializeUserData(token)
+      }
+      
+      return true
+    } catch (error) {
+      console.error('Error al verificar/inicializar datos del usuario:', error)
+      return false
     }
   }
 }

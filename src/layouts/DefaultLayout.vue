@@ -1,10 +1,10 @@
 <template>
-  <v-app>
+  <v-app class="app-container">
     <!-- Navigation Bar siempre presente -->
     <NavigationBar />
     
     <!-- Contenido principal que cambia según la página -->
-    <v-main>
+    <v-main class="main-wrapper">
       <div class="main-container">
         <v-card 
           class="main-card"  
@@ -21,16 +21,50 @@ import NavigationBar from '../components/NavigationBar.vue'
 </script>
 
 <style scoped>
-.main-container {
-  padding: 16px;
-  min-height: calc(100vh - 64px);
+.app-container {
+  height: 100vh !important;
+  overflow: hidden !important;
 }
 
-.main-card { 
-  min-height: calc(100vh - 96px);
+.main-wrapper {
+  height: calc(100vh - 64px) !important;
+  overflow: hidden !important;
+}
+
+.main-container {
+  padding: 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.main-card {
+  flex: 1;
   width: 100%;
+  box-sizing: border-box;
   position: relative;
-  background-color: transparent;
+  background-color: #e6eae7;
   border-radius: 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+</style>
+
+<style>
+/* Estilos globales para eliminar scroll del body */
+html, body {
+  overflow: hidden !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.v-application {
+  height: 100vh !important;
+  overflow: hidden !important;
 }
 </style>

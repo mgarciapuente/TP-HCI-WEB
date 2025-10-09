@@ -2,7 +2,9 @@
 
 
 <template>
-   
+  <div class="lists-page">
+    <v-card class="lists-card">
+      <div class="lists-content">
         <!-- Cuando no hay listas (lists === 0) -->
         <div v-if="lists === 0" class="empty-state">
           <!-- Botón de historial para estado vacío -->
@@ -100,6 +102,9 @@
             </div>
           </div>
         </div>
+      </div>
+    </v-card>
+  </div>
 
         <!-- FAB único cuando no hay listas -->
         <v-btn
@@ -196,6 +201,28 @@ const openHistory = () => {
 </script>
 
 <style scoped>
+/* Estilos de la página y card principal */
+.lists-page {
+  min-height: calc(100vh - 96px);
+  padding: 0;
+}
+
+.lists-card {
+  background-color: #F6F8F7 !important;
+  border-radius: 16px !important;
+  min-height: calc(100vh - 96px);
+  box-shadow: none !important;
+  border: none !important;
+  overflow: hidden;
+}
+
+.lists-content {
+  padding: 24px;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  height: 100%;
+}
+
 /* FAB único cuando no hay listas (centrado) */
 .fab-button-center {
   position: absolute;
