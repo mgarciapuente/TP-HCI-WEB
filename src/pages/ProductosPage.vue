@@ -1,66 +1,63 @@
 <template>
-  <div class="productos-page">
-    <!-- Header -->
-    <div class="page-header mb-6">
-      <h1 class="page-title">Productos</h1>
-    </div>
+  <div> 
+    <div class="productos-page">
+      <div class="page-header mb-6">
+        <h1 class="page-title">Productos</h1>
+      </div>
 
-    <!-- Buscador -->
-    <div class="search-section mb-4">
-      <v-text-field
-        v-model="searchTerm"
-        label="Encontrá tus productos"
-        placeholder="Buscar productos..."
-        variant="outlined"
-        prepend-inner-icon="mdi-magnify"
-        clearable
-        hide-details
-        @update:model-value="debouncedSearch"
-        class="search-input"
-      />
-    </div>
+      <div class="search-section mb-4">
+        <v-text-field
+          v-model="searchTerm"
+          label="Encontrá tus productos"
+          placeholder="Buscar productos..."
+          variant="outlined"
+          prepend-inner-icon="mdi-magnify"
+          clearable
+          hide-details
+          @update:model-value="debouncedSearch"
+          class="search-input"
+        />
+      </div>
 
-    <!-- Filtros por categorías -->
-    <CategoryFilters @category-changed="handleCategoryChange" />
+      <CategoryFilters @category-changed="handleCategoryChange" />
 
-    <!-- Loading -->
-    <div v-if="loading" class="d-flex justify-center py-8">
-      <v-progress-circular color="orange" indeterminate size="48" />
-    </div>
+      <div v-if="loading" class="d-flex justify-center py-8">
+        <v-progress-circular color="secondary" indeterminate size="48" />
+      </div>
 
-    <!-- Contenido principal -->
-    <div v-else>
-      <!-- Grid de productos -->
-      <ProductsGrid
-        v-if="products.length > 0"
-        :products="products"
-        :current-page="currentPage"
-        :total-pages="totalPages"
-        @edit-product="handleEditProduct"
-        @delete-product="handleDeleteProduct"
-        @page-changed="handlePageChange"
-      />
+      <div v-else>
+        <ProductsGrid
+          v-if="products.length > 0"
+          :products="products"
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          @edit-product="handleEditProduct"
+          @delete-product="handleDeleteProduct"
+          @page-changed="handlePageChange"
+        />
 
-      <!-- Estado vacío -->
-      <EmptyProducts
-        v-else
-        @add-product="openAddProductModal"
-      />
-    </div>
-    
-    <!-- FAB para agregar productos (visible cuando hay productos) -->
-    <v-fab
+        <EmptyProducts
+          v-else
+          @add-product="openAddProductModal"
+        />
+      </div>
+    </div> <v-fab
       v-if="products.length > 0"
-      color="orange"
+      color="secondary"
       icon="mdi-plus"
       @click="openAddProductModal"
       class="fab-inside-card"
     />
 
-    <!-- Modal para agregar productos -->
     <AddProductModal
       v-model="showAddModal"
       @product-created="handleProductCreated"
+    />
+
+    <EditProductModal
+      v-model="showEditModal"
+      :product="selectedProduct"
+      @product-updated="handleProductUpdated"
     />
   </div>
 </template>
@@ -73,6 +70,7 @@ import CategoryFilters from '../components/CategoryFilters.vue'
 import ProductsGrid from '../components/ProductsGrid.vue'
 import EmptyProducts from '../components/EmptyProducts.vue'
 import AddProductModal from '../components/AddProductModal.vue'
+import EditProductModal from '../components/EditProductModal.vue'
 
 // Stores
 const authStore = useAuthStore()
@@ -86,6 +84,8 @@ const currentPage = ref(1)
 const totalPages = ref(1)
 const totalCount = ref(0)
 const showAddModal = ref(false)
+const showEditModal = ref(false)
+const selectedProduct = ref<Product | null>(null)
 
 // Función debounce personalizada
 const debounce = (func: Function, delay: number) => {
@@ -107,7 +107,7 @@ const loadProducts = async (resetPage = false) => {
     
     const params = {
       page: currentPage.value,
-      per_page: 12,
+      per_page: 24,
       ...(searchTerm.value && { name: searchTerm.value }),
       ...(selectedCategoryId.value && { category_id: selectedCategoryId.value }),
       sort_by: 'name',
@@ -144,13 +144,22 @@ const handlePageChange = (page: number) => {
 }
 
 const handleEditProduct = (product: Product) => {
-  // TODO: Implementar edición de productos
-  console.log('Editar producto:', product)
+  selectedProduct.value = product
+  showEditModal.value = true
 }
 
-const handleDeleteProduct = (product: Product) => {
-  // TODO: Implementar eliminación de productos
-  console.log('Eliminar producto:', product)
+const handleDeleteProduct = async (product: Product) => {
+  try {
+    const confirmed = confirm(`¿Estás seguro de que quieres eliminar "${product.name}"?`)
+    if (!confirmed) return
+
+    await productsService.deleteProduct(product.id, authStore.token || undefined)
+    
+    await loadProducts()
+  } catch (error) {
+    console.error('Error al eliminar producto:', error)
+    alert('Error al eliminar el producto. Por favor intenta de nuevo.')
+  }
 }
 
 const openAddProductModal = () => {
@@ -158,8 +167,12 @@ const openAddProductModal = () => {
 }
 
 const handleProductCreated = () => {
-  // Recargar los productos después de agregar uno nuevo
   loadProducts()
+}
+
+const handleProductUpdated = async () => {
+  selectedProduct.value = null
+  await loadProducts()
 }
 
 // Lifecycle
@@ -170,10 +183,11 @@ onMounted(() => {
 
 <style scoped>
 .productos-page {
-  padding: 24px;
-  padding-bottom: 100px; /* Espacio para el FAB */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   position: relative;
-  min-height: calc(100vh - 96px);
+  overflow-y: auto;
 }
 
 .page-header {
@@ -200,19 +214,47 @@ onMounted(() => {
   border-radius: 12px;
 }
 
-/* FAB fijo dentro de la card del layout */
 .fab-inside-card {
-  position: fixed !important;
-  bottom: 40px !important;
-  right: 40px !important;
-  z-index: 10 !important;
+  position: fixed;
+  bottom: 2rem;  
+  right: 2rem;    
+  z-index: 1000; 
 }
 
 :deep(.fab-inside-card .v-btn) {
-  background-color: var(--color-orange) !important;
+  background-color: rgb(var(--v-theme-secondary)) !important;
 }
 
 :deep(.fab-inside-card .v-btn:hover) {
-  background-color: var(--color-orange-hover) !important;
+  background-color: rgb(var(--v-theme-secondary)) !important;
+  opacity: 0.9;
 }
+</style>
+
+<style>
+  /* ESTILOS GLOBALES PARA EL SCROLLBAR */
+
+  /* Para navegadores basados en WebKit (Chrome, Safari, Edge, Opera) */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* El "track" por donde se desliza */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  /* La parte que se arrastra */
+  ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+    border: 2px solid #f1f1f1;
+  }
+
+  /* Cuando pasás el mouse por encima */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
 </style>

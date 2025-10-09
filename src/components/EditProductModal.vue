@@ -2,8 +2,8 @@
   <v-dialog v-model="dialog" max-width="500" persistent>
     <v-card>
       <v-card-title class="d-flex align-center pa-4">
-        <v-icon start color="secondary">mdi-package-variant-plus</v-icon>
-        Agregar Nuevo Producto
+        <v-icon start color="secondary">mdi-pencil</v-icon>
+        Editar Producto
       </v-card-title>
       
       <v-card-text class="pa-4">
@@ -11,7 +11,6 @@
           <v-text-field
             v-model="productForm.name"
             label="Nombre del producto *"
-            placeholder="ej: Leche descremada"
             variant="outlined"
             persistent-placeholder
             :rules="nameRules"
@@ -46,7 +45,7 @@
           :disabled="!valid || loading"
           :loading="loading"
         >
-          Agregar Producto
+          Guardar Cambios
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -55,23 +54,21 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch, onMounted } from 'vue'
-import { categoriesService, productsService, type Category, type CreateProductRequest } from '../services/productsService'
+import { categoriesService, productsService, type Category, type Product, type CreateProductRequest } from '../services/productsService'
 import { useAuthStore } from '../stores/auth'
 
-// Props y emits
 const props = defineProps<{
   modelValue: boolean
+  product: Product | null
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  'productCreated': [product: any]
+  'productUpdated': [product: Product]
 }>()
 
-// Stores
 const authStore = useAuthStore()
 
-// Estado reactivo
 const dialog = ref(props.modelValue)
 const valid = ref(false)
 const loading = ref(false)
@@ -85,7 +82,6 @@ const productForm = reactive({
   categoryId: null as number | null
 })
 
-// Reglas de validación
 const nameRules = [
   (v: string) => !!v || 'El nombre es requerido',
   (v: string) => (v && v.length >= 2) || 'El nombre debe tener al menos 2 caracteres',
@@ -95,12 +91,11 @@ const categoryRules = [
   (v: number | null) => !!v || 'La categoría es requerida',
 ]
 
-// Watchers
 watch(() => props.modelValue, (newVal) => {
   dialog.value = newVal
-  if (newVal) {
-    resetForm()
+  if (newVal && props.product) {
     loadCategories()
+    populateForm()
   }
 })
 
@@ -108,7 +103,6 @@ watch(dialog, (newVal) => {
   emit('update:modelValue', newVal)
 })
 
-// Métodos
 const loadCategories = async () => {
   try {
     loadingCategories.value = true
@@ -118,6 +112,13 @@ const loadCategories = async () => {
     console.error('Error al cargar categorías:', error)
   } finally {
     loadingCategories.value = false
+  }
+}
+
+const populateForm = () => {
+  if (props.product) {
+    productForm.name = props.product.name
+    productForm.categoryId = props.product.category.id
   }
 }
 
@@ -131,36 +132,36 @@ const resetForm = () => {
 
 const handleCancel = () => {
   dialog.value = false
+  resetForm()
 }
 
 const handleSubmit = async () => {
-  if (!valid.value) return
+  if (!valid.value || !props.product) return
 
   try {
     loading.value = true
     
-    const createRequest: CreateProductRequest = {
+    const updateRequest: CreateProductRequest = {
       name: productForm.name,
       category: {
         id: productForm.categoryId!
       },
-      metadata: {}
+      metadata: props.product.metadata || {}
     }
     
-    const newProduct = await productsService.createProduct(createRequest, authStore.token || undefined)
+    const updatedProduct = await productsService.updateProduct(props.product.id, updateRequest, authStore.token || undefined)
     
-    emit('productCreated', newProduct)
+    emit('productUpdated', updatedProduct)
     dialog.value = false
+    resetForm()
     
   } catch (error) {
-    console.error('Error al crear producto:', error)
-    // Aquí podrías mostrar una notificación de error
+    console.error('Error al actualizar producto:', error)
   } finally {
     loading.value = false
   }
 }
 
-// Lifecycle
 onMounted(() => {
   if (dialog.value) {
     loadCategories()

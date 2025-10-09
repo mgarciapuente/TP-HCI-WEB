@@ -87,10 +87,12 @@ export const productsService = {
   },
 
   // Crear nuevo producto
-  async createProduct(productData: CreateProductRequest) {
+  async createProduct(productData: CreateProductRequest, token?: string) {
+    const headers = token ? createAuthHeaders(token) : API_CONFIG.DEFAULT_HEADERS
+    
     const response = await fetch(createApiUrl('/api/products'), {
       method: 'POST',
-      headers: API_CONFIG.DEFAULT_HEADERS,
+      headers,
       body: JSON.stringify(productData)
     })
     
@@ -99,6 +101,39 @@ export const productsService = {
     }
     
     return response.json() as Promise<Product>
+  },
+
+  // Actualizar producto
+  async updateProduct(productId: number, productData: CreateProductRequest, token?: string) {
+    const headers = token ? createAuthHeaders(token) : API_CONFIG.DEFAULT_HEADERS
+    
+    const response = await fetch(createApiUrl(`/api/products/${productId}`), {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(productData)
+    })
+    
+    if (!response.ok) {
+      throw new Error('Error al actualizar producto')
+    }
+    
+    return response.json() as Promise<Product>
+  },
+
+  // Eliminar producto
+  async deleteProduct(productId: number, token?: string) {
+    const headers = token ? createAuthHeaders(token) : API_CONFIG.DEFAULT_HEADERS
+    
+    const response = await fetch(createApiUrl(`/api/products/${productId}`), {
+      method: 'DELETE',
+      headers
+    })
+    
+    if (!response.ok) {
+      throw new Error('Error al eliminar producto')
+    }
+    
+    return response.ok
   }
 }
 

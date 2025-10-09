@@ -16,7 +16,7 @@
       </p>
       
       <v-btn
-        color="orange"
+        color="secondary"
         variant="elevated"
         size="large"
         prepend-icon="mdi-plus"
@@ -71,11 +71,12 @@ const handleAddProduct = () => {
 }
 
 :deep(.v-btn) {
-  background-color: var(--color-orange) !important;
+  background-color: rgb(var(--v-theme-secondary)) !important;
   color: white !important;
 }
 
 :deep(.v-btn:hover) {
-  background-color: var(--color-orange-hover) !important;
+  background-color: rgb(var(--v-theme-secondary)) !important;
+  opacity: 0.9;
 }
 </style>

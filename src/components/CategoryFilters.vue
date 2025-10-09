@@ -2,24 +2,16 @@
   <div class="category-filters">
     <v-chip-group
       v-model="selectedCategory"
-      selected-class="text-orange"
+      selected-class="text-secondary"
       filter
       variant="outlined"
       @update:model-value="handleCategoryChange"
     >
       <v-chip
-        value=""
-        :color="!selectedCategory ? 'orange' : undefined"
-        :variant="!selectedCategory ? 'elevated' : 'outlined'"
-      >
-        Todas las categorías
-      </v-chip>
-      
-      <v-chip
         v-for="category in categories"
         :key="category.id"
         :value="category.id"
-        :color="selectedCategory === category.id ? 'orange' : undefined"
+        :color="selectedCategory === category.id ? 'secondary' : undefined"
         :variant="selectedCategory === category.id ? 'elevated' : 'outlined'"
       >
         {{ category.name }}
@@ -86,20 +78,20 @@ onMounted(() => {
 }
 
 :deep(.v-chip:hover) {
-  border-color: var(--color-orange) !important;
-  color: var(--color-orange) !important;
+  border-color: rgb(var(--v-theme-secondary)) !important;
+  color: rgb(var(--v-theme-secondary)) !important;
 }
 
-:deep(.v-chip--selected.text-orange) {
-  background-color: var(--color-orange) !important;
+:deep(.v-chip--selected.text-secondary) {
+  background-color: rgb(var(--v-theme-secondary)) !important;
   color: white !important;
-  border-color: var(--color-orange) !important;
+  border-color: rgb(var(--v-theme-secondary)) !important;
 }
 
 :deep(.v-chip.v-chip--variant-elevated) {
-  background-color: var(--color-orange) !important;
+  background-color: rgb(var(--v-theme-secondary)) !important;
   color: white !important;
-  border-color: var(--color-orange) !important;
+  border-color: rgb(var(--v-theme-secondary)) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 

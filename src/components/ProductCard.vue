@@ -7,7 +7,7 @@
     <v-card-text class="d-flex align-center pa-4">
       <v-icon
         size="40"
-        color="orange"
+        color="secondary"
         class="me-3"
       >
         mdi-package-variant

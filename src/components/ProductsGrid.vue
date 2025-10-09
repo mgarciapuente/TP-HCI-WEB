@@ -23,7 +23,7 @@
         v-model="currentPage"
         :length="totalPages"
         :total-visible="7"
-        color="orange"
+        color="secondary"
         @update:model-value="handlePageChange"
       />
     </div>
@@ -74,5 +74,16 @@ const handlePageChange = (page: number) => {
 <style scoped>
 .products-grid {
   margin-top: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.products-grid .v-row {
+  flex: 1;
+  width: 100%;
+  margin: 0 !important;
 }
 </style>
