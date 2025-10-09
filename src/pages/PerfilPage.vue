@@ -1,14 +1,10 @@
 <template>
   <div class="perfil-page">
-    <v-card class="perfil-card">
-      <div class="perfil-content">
-        <h1 class="perfil-title">Perfil</h1>
-        <div>
-          <UserProfile v-if="authStore.isLoggedIn" />
-          <LoginForm v-else />
-        </div>
-      </div>
-    </v-card>
+    <h1 class="perfil-title">Perfil</h1>
+    <div>
+      <UserProfile v-if="authStore.isLoggedIn" />
+      <LoginForm v-else />
+    </div>
   </div>
 </template>
 
@@ -22,23 +18,8 @@ const authStore = useAuthStore()
 
 <style scoped>
 .perfil-page {
-  min-height: calc(100vh - 96px);
-  padding: 0;
-}
-
-.perfil-card {
-  background-color: #F6F8F7 !important;
-  border-radius: 16px !important;
-  min-height: calc(100vh - 96px);
-  box-shadow: none !important;
-  border: none !important;
-  overflow: hidden;
-}
-
-.perfil-content {
   padding: 24px;
-  max-height: calc(100vh - 96px);
-  overflow-y: auto;
+  min-height: calc(100vh - 96px);
 }
 
 .perfil-title {

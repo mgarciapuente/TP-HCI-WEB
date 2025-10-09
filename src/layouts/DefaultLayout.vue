@@ -28,9 +28,11 @@ import NavigationBar from '../components/NavigationBar.vue'
 
 .main-card { 
   min-height: calc(100vh - 96px);
+  max-height: calc(100vh - 96px);
   width: 100%;
   position: relative;
-  background-color: transparent;
+  background-color: #e4ebe7;
   border-radius: 16px;
+  overflow-y: auto;
 }
 </style>
