@@ -45,21 +45,41 @@ export const useAuthStore = defineStore('auth', () => {
     const storedUser = localStorage.getItem('user')
     const storedToken = localStorage.getItem('token')
 
+    console.log(' Inicializando auth...', { hasToken: !!storedToken, hasUser: !!storedUser })
+
     if (storedToken && storedUser) {
       try {
+        // Primero intentar usar los datos almacenados
+        const parsedUser = JSON.parse(storedUser)
+        user.value = parsedUser
+        token.value = storedToken
+        
+        console.log(' Datos cargados desde localStorage:', parsedUser.email)
+
         // 🔧 CÓDIGO REAL para cuando el backend esté disponible
         // Verificar que el token sigue siendo válido obteniendo el perfil
-        const userProfile = await userService.getProfile(storedToken)
-        user.value = userProfile
-        token.value = storedToken
+        try {
+          const userProfile = await userService.getProfile(storedToken)
+          // Actualizar con datos frescos del servidor
+          user.value = userProfile
+          localStorage.setItem('user', JSON.stringify(userProfile))
+          console.log(' Token validado con el servidor')
+        } catch (apiError) {
+          console.warn('No se pudo validar el token con el servidor (posiblemente modo bypass):', apiError)
+          // En modo bypass, mantener los datos del localStorage
+          // Solo limpiar si es un error de autenticación real
+        }
+        
       } catch (error) {
-        console.error('Token inválido, limpiando sesión:', error)
-        // Si el token no es válido, limpiar todo
+        console.error(' Error al parsear datos almacenados, limpiando sesión:', error)
+        // Si hay error parseando los datos, limpiar todo
         localStorage.removeItem('token')
         localStorage.removeItem('user')
         user.value = null
         token.value = null
       }
+    } else {
+      console.log('No hay sesión almacenada')
     }
   }
 

@@ -176,8 +176,7 @@ const handleRegister = async () => {
 </style>
 
 <template>
-  <div id="a"
-    style="background-color:#C7D8BA; min-height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center; padding: 20px;">
+  <div class="d-flex justify-center align-center" style="min-height: 100%; padding: 20px;">
     <v-card class="auth-card"
       style="width: 100%; max-width: 450px; padding: 40px; border-radius: 16px; background-color: rgba(255,255,255,0.95);"
       elevation="8">
@@ -253,4 +252,5 @@ const handleRegister = async () => {
       </v-form>
     </v-card>
   </div>
+
 </template>

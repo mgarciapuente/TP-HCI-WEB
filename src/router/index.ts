@@ -3,6 +3,7 @@ import { useAuthStore } from '../stores/auth'
 import ListsPage from '../pages/ListsPage.vue'
 import ProductosPage from '../pages/ProductosPage.vue'
 import PerfilPage from '../pages/PerfilPage.vue'
+import ConfiguracionPage from '../pages/ConfiguracionPage.vue'
 
 const routes = [
   {
@@ -53,6 +54,12 @@ const routes = [
     path: '/perfil',
     name: 'perfil',
     component: PerfilPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/configuracion',
+    name: 'configuracion',
+    component: ConfiguracionPage,
     meta: { requiresAuth: true }
   }
 ]

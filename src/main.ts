@@ -19,12 +19,23 @@ app
 
 // Inicializar autenticación después de que Pinia esté configurado
 const authStore = useAuthStore()
-authStore.initAuth().then(() => {
-  app.mount('#app')
-}).catch((error) => {
-  console.error('Error al inicializar autenticación:', error)
-  // Montar la app aunque falle la inicialización
-  app.mount('#app')
-})
+
+// Función asíncrona para inicializar la app
+const initApp = async () => {
+  try {
+    // Inicializar autenticación desde localStorage
+    await authStore.initAuth()
+    console.log(' Autenticación inicializada:', authStore.isLoggedIn ? 'Usuario logueado' : 'Usuario no logueado')
+  } catch (error) {
+    console.error('Error al inicializar autenticación:', error)
+    // Continuar con el montaje aunque falle la inicialización
+  } finally {
+    // Montar la app después de la inicialización de auth
+    app.mount('#app')
+  }
+}
+
+// Inicializar la aplicación
+initApp()
 
 

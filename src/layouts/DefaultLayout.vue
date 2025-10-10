@@ -44,15 +44,16 @@ import NavigationBar from '../components/NavigationBar.vue'
   width: 100%;
   box-sizing: border-box;
   position: relative;
-  background-color: #e6eae7;
+  background-color: rgb(var(--v-theme-surface));
   border-radius: 16px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 20px;
+
   display: flex;
   flex-direction: column;
 }
 </style>
+<!-- padding: 20px; le quite esto al main card-->
 
 <style>
 /* Estilos globales para eliminar scroll del body */
