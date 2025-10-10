@@ -39,8 +39,8 @@ import NavigationBar from '../components/NavigationBar.vue'
   overflow: hidden;
 }
 
-.main-card {
-  flex: 1;
+.main-card { 
+  height: calc(100vh - 96px);
   width: 100%;
   box-sizing: border-box;
   position: relative;
