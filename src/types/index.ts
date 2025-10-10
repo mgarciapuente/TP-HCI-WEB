@@ -7,3 +7,4 @@
 //mas escalable y limpio.
 
 export * from './userTypes'
+export * from './listTypes'
