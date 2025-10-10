@@ -100,7 +100,7 @@ defineExpose({ refresh: fetchItems })
 .products-scroll {
     flex: 1;
     overflow-y: auto;
-    padding-right: 0.5em;
+    padding: 0.5em;
 }
 
 .no-products {
@@ -148,7 +148,7 @@ defineExpose({ refresh: fetchItems })
             </div>
 
             <div v-else class="products-list">
-                <v-card v-for="product in items" :key="product.id" class="product-item mb-2" variant="flat">
+                <v-card v-for="product in items" :key="product.id" class="product-item mb-2" variant="flat" color="backgroundColor">
                     <v-card-text class="product-content">
                         <div class="product-info">
                             <h4 class="product-name">{{ product.product?.name }}</h4>
