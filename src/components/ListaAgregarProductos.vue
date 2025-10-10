@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { listService } from '@/services/listService'
 import { productService } from '@/services/productService'
@@ -39,9 +39,10 @@ const fetchProducts = async () => {
     }
 }
 
-// Si estamos en modo agregar productos, cargamos el listado global
-watch(() => props.addProductMode, (val) => {
-    if (val) fetchProducts()
+// El componente se renderiza únicamente cuando addProductMode === true (v-if en el padre),
+// por lo que basta con cargar los productos al montarse.
+onMounted(() => {
+    fetchProducts()
 })
 
 // handleOpen removed; use openAddForProduct from template buttons
@@ -103,7 +104,21 @@ const confirmAdd = async () => {
 .products-scroll {
     flex: 1;
     overflow-y: auto;
-    padding-right: 0.5em;
+    padding: 0.5em;
+}
+
+.product-item {
+    margin-bottom: 1em;
+    border-radius: 20px;
+    border-width: 3px;
+    border-style: solid;
+    border-color: transparent;
+}
+
+.product-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .no-products {
@@ -146,16 +161,14 @@ const confirmAdd = async () => {
             </div>
 
             <div v-else class="products-list">
-                <v-card v-for="product in items" :key="product.id" class="product-item mb-2" variant="flat">
+                <v-card v-for="product in items" :key="product.id" class="product-item" variant="flat" color="backgroundColor">
                     <v-card-text class="product-content">
                         <div class="product-info">
-                            <h4 class="product-name">{{ product.name || product.product?.name }}</h4>
+                            <h3 class="product-name">{{ product.name || product.product?.name }}</h3>
                             <p class="product-details">{{ product.description || product.metadata?.notes || '' }}</p>
                         </div>
                         <v-spacer />
-                        <v-btn icon color="secondary" @click="openAddForProduct(product)">
-                            <v-icon>mdi-plus</v-icon>
-                        </v-btn>
+                        <v-icon size="x-large" @click="openAddForProduct(product)" color="secondary">mdi-plus</v-icon>
                     </v-card-text>
                 </v-card>
             </div>
@@ -167,8 +180,10 @@ const confirmAdd = async () => {
                 <v-card-title>Agregar "{{ productToAdd?.name || productToAdd?.product?.name }}"</v-card-title>
                 <v-card-text>
                     <v-form>
-                        <v-text-field v-model.number="addForm.quantity" label="Cantidad" type="number" min="0.01" step="0.01" />
-                        <v-select v-model="addForm.unit" :items="['unidades','kg','gr','lt','ml','paquete']" label="Unidad" />
+                        <v-text-field v-model.number="addForm.quantity" label="Cantidad" type="number" min="0.01"
+                            step="0.01" />
+                        <v-select v-model="addForm.unit" :items="['unidades', 'kg', 'gr', 'lt', 'ml', 'paquete']"
+                            label="Unidad" />
                     </v-form>
                 </v-card-text>
                 <v-card-actions>
