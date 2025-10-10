@@ -14,58 +14,26 @@
       </p>
     </div>
     
-    <!-- Grilla de botones 2x2 -->
-    <v-container fluid class="buttons-grid">
-      <v-row>
-        <v-col cols="6">
-          <v-btn 
-            variant="outlined" 
-            block 
-            class="grid-button"
-            style="border-color: #465D46; color: #465D46;"
-          >
-            <v-icon start>mdi-cog</v-icon>
-            Configuración
-          </v-btn>
-        </v-col>
-        <v-col cols="6">
-          <v-btn 
-            variant="outlined" 
-            block 
-            class="grid-button"
-            style="border-color: #465D46; color: #465D46;"
-          >
-            <v-icon start>mdi-home-variant</v-icon>
-            Alacena
-          </v-btn>
-        </v-col>
-      </v-row>
-      
-      <v-row>
-        <v-col cols="6">
-          <v-btn 
-            variant="outlined" 
-            block 
-            class="grid-button"
-            style="border-color: #465D46; color: #465D46;"
-          >
-            <v-icon start>mdi-translate</v-icon>
-            Idioma
-          </v-btn>
-        </v-col>
-        <v-col cols="6">
-          <v-btn 
-            variant="outlined" 
-            block 
-            class="grid-button"
-            style="border-color: #465D46; color: #465D46;"
-          >
-            <v-icon start>mdi-pencil</v-icon>
-            Editar perfil
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-container>
+    <!-- Botón de editar perfil -->
+    <div class="edit-profile-section">
+      <v-btn 
+        variant="outlined" 
+        class="edit-profile-button"
+        style="border-color: #465D46; color: #465D46;"
+        @click="openEditModal"
+      >
+        <v-icon start>mdi-pencil</v-icon>
+        Editar perfil
+      </v-btn>
+    </div>
+
+    <!-- Modal de edición de perfil -->
+    <EditProfileModal
+      v-model="showEditModal"
+      :initial-name="authStore.user?.name"
+      :initial-surname="authStore.user?.surname"
+      @profile-updated="handleProfileUpdated"
+    />
     
     <!-- Botón de logout -->
     <v-btn 
@@ -86,10 +54,12 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import EditProfileModal from './EditProfileModal.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
 const loggingOut = ref(false)
+const showEditModal = ref(false)
 
 // Computed para el nombre completo
 const fullName = computed(() => {
@@ -110,6 +80,17 @@ const formatDate = (dateString: string) => {
   } catch {
     return 'Fecha no disponible'
   }
+}
+
+// Abrir modal de edición
+const openEditModal = () => {
+  showEditModal.value = true
+}
+
+// Manejar actualización exitosa del perfil
+const handleProfileUpdated = (updatedUser: any) => {
+  console.log('Perfil actualizado exitosamente:', updatedUser)
+  // Aquí podrías mostrar un mensaje de éxito si quieres
 }
 
 // Manejar logout
@@ -153,14 +134,17 @@ const handleLogout = async () => {
   display: block;
 }
 
-.buttons-grid {
+.edit-profile-section {
   margin: 1rem 0;
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
-.grid-button {
+.edit-profile-button {
   height: 48px;
   font-size: 0.9em;
+  min-width: 200px;
 }
 
 .profile-container {

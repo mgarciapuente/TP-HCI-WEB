@@ -30,6 +30,7 @@
                 color="primary" 
                 size="small"
                 style="border-radius: 8px;"
+                @click="openChangePasswordModal"
               >
                 Cambiar
               </v-btn>
@@ -187,11 +188,18 @@
         </v-card-text>
       </v-card>
     </div>
+
+    <!-- Modal de cambio de contraseña -->
+    <ChangePasswordModal
+      v-model="showChangePasswordModal"
+      @password-changed="handlePasswordChanged"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import ChangePasswordModal from '../components/ChangePasswordModal.vue'
 
 // Estado de las configuraciones
 const emailNotifications = ref(true)
@@ -199,6 +207,20 @@ const listReminders = ref(true)
 const sharedListNotifications = ref(true)
 const publicProfile = ref(false)
 const shareAnalytics = ref(true)
+
+// Estado del modal de cambio de contraseña
+const showChangePasswordModal = ref(false)
+
+// Abrir modal de cambio de contraseña
+const openChangePasswordModal = () => {
+  showChangePasswordModal.value = true
+}
+
+// Manejar cambio exitoso de contraseña
+const handlePasswordChanged = () => {
+  console.log('Contraseña cambiada exitosamente')
+  // Aquí podrías mostrar un snackbar o notificación de éxito
+}
 
 // TODO: Aquí se implementarían las funciones para guardar las configuraciones
 // const saveSettings = async () => {
