@@ -32,7 +32,7 @@ import NavigationBar from '../components/NavigationBar.vue'
 }
 
 .main-container {
-  padding: 24px;
+  padding: 1.5em;
   height: 100%;
   display: flex;
   flex-direction: column;

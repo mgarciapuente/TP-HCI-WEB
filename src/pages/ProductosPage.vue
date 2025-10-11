@@ -19,7 +19,7 @@
         />
       </div>
 
-      <CategoryFilters @category-changed="handleCategoryChange" />
+      <CategoryFilters class="category-filters" @category-changed="handleCategoryChange" />
 
       <div v-if="loading" class="d-flex justify-center py-8">
         <v-progress-circular color="secondary" indeterminate size="48" />
@@ -198,12 +198,14 @@ onMounted(() => {
   font-size: 2.5rem;
   font-weight: 500;
   color: #333;
-  margin-bottom: 8px;
+  padding: 0.5em
 }
 
 .search-section {
   width: 100%;
   margin: 0 auto;
+  padding-left: 1em;
+  padding-right: 1em;
 }
 
 .search-input {
@@ -228,6 +230,10 @@ onMounted(() => {
 :deep(.fab-inside-card .v-btn:hover) {
   background-color: rgb(var(--v-theme-secondary)) !important;
   opacity: 0.9;
+}
+
+.category-filters {
+  padding-left: 1em;
 }
 </style>
 

@@ -9,7 +9,7 @@ export default createVuetify({
         colors: {
           primary: '#465D46',
           secondary: '#F5844E',
-          surface: '#F6F8F7',
+          surface: 'rgba(237, 241, 239, 1)7',
           background: '#F5F5F5',
           backgroundColor: '#EBEEEB',
           buttons: '#FCFBF8',

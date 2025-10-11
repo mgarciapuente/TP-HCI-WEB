@@ -79,6 +79,7 @@ const deleteProduct = () => {
 .product-card {
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   border-radius: 12px;
+  background-color: white;
 }
 
 .product-card:hover {

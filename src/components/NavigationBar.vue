@@ -153,6 +153,7 @@ const handleLogout = async () => {
   outline: none !important;
   border: none !important;
   box-shadow: none !important;
+  margin-left: 1em;
 }
 
 .navbar-title-container {
@@ -222,6 +223,8 @@ const handleLogout = async () => {
   border: 2px solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
   transition: all 0.2s ease;
+  margin-right: 1em;
+  margin-left: 1em;
 }
 
 .profile-avatar:hover {
