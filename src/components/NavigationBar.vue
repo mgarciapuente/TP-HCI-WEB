@@ -218,7 +218,7 @@ const handleLogout = async () => {
 
 /* Estilos para el avatar de perfil */
 .profile-avatar {
-  background-color: rgb(var(--v-theme-surface)) !important;
+  /* background-color: rgb(var(--v-theme-surface)) !important; */
   border: 2px solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
   transition: all 0.2s ease;
