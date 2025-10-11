@@ -53,13 +53,13 @@
       @mouseenter="showDropdown = true"
       @mouseleave="hideDropdownDelayed"
     >
-      <v-avatar 
-        size="40"
+      <UserAvatar 
+        :avatarId="authStore.user?.metadata?.avatarId || 1"
+        :size="40"
+        :showBorder="true"
+        borderColor="rgba(255, 255, 255, 0.3)"
         class="profile-avatar"
-        :class="{ 'active-avatar': isActive('/perfil') || isActive('/configuracion') }"
-      >
-        <span class="profile-initials">{{ userInitials }}</span>
-      </v-avatar>
+      />
 
       <!-- Desplegable -->
       <div 
@@ -95,6 +95,7 @@
 import { useRoute, useRouter } from 'vue-router'
 import { computed, ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import UserAvatar from './UserAvatar.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -122,19 +123,6 @@ const cancelHideDropdown = () => {
   }
   showDropdown.value = true
 }
-
-// Computed para las iniciales del usuario
-const userInitials = computed(() => {
-  if (!authStore.user) return 'U'
-  
-  const firstName = authStore.user.name || ''
-  const lastName = authStore.user.surname || ''
-  
-  const firstInitial = firstName.charAt(0).toUpperCase()
-  const lastInitial = lastName.charAt(0).toUpperCase()
-  
-  return firstInitial + lastInitial
-})
 
 // Funciones de navegación
 const navigateToProfile = () => {

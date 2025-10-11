@@ -3,9 +3,11 @@
     <!-- Información del usuario -->
     <div class="profile-info">
       <div class="profile-avatar-container">
-        <v-avatar size="100" style="margin-bottom: 16px;">
-          <v-icon size="60" color="#465D46">mdi-account-circle</v-icon>
-        </v-avatar>
+        <UserAvatar 
+          :avatarId="authStore.user?.metadata?.avatarId || 1"
+          :size="100"
+          style="margin-bottom: 16px;"
+        />
       </div>
       <h2 class="perfil-name">{{ fullName }}</h2>
       <p class="perfil-email">{{ authStore.user?.email }}</p>
@@ -56,6 +58,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import EditProfileModal from './EditProfileModal.vue'
+import UserAvatar from './UserAvatar.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()

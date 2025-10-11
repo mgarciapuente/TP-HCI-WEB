@@ -6,6 +6,7 @@ import { userService, ApiException } from '../services'
 import type { RegistrationData, Credentials } from '../types'
 import logoImg from '@/assets/logo.png'
 import ForgotPasswordModal from '../components/ForgotPasswordModal.vue'
+import { DEFAULT_AVATAR_ID } from '@/composables/avatars'
 
 // Composables
 const router = useRouter()
@@ -129,7 +130,9 @@ const handleRegister = async () => {
     surname: formData.value.surname,
     email: formData.value.email,
     password: formData.value.password,
-    metadata: {}
+    metadata: {
+      avatarId: DEFAULT_AVATAR_ID
+    }
   }
 
   try {

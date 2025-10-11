@@ -27,7 +27,7 @@ export interface User {
   name: string
   surname: string
   password?: string
-  metadata?: object
+  metadata?: UserMetadata
   updatedAt: string
   createdAt?: string
 }
@@ -38,16 +38,21 @@ export interface GetUser {
   name: string
   surname: string
   email: string
-  metadata?: object
+  metadata?: UserMetadata
   updatedAt?: string
   createdAt?: string
+}
+
+// Metadatos del usuario
+export interface UserMetadata {
+  avatarId?: number
 }
 
 // Datos para actualizar perfil de usuario
 export interface UpdateUserProfile {
   name?: string
   surname?: string
-  metadata?: object
+  metadata?: UserMetadata
 }
 
 // Datos para cambio de contraseña
