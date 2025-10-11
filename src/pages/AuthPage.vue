@@ -5,6 +5,7 @@ import { useAuthStore } from '../stores/auth'
 import { userService, ApiException } from '../services'
 import type { RegistrationData, Credentials } from '../types'
 import logoImg from '@/assets/logo.png'
+import ForgotPasswordModal from '../components/ForgotPasswordModal.vue'
 
 // Composables
 const router = useRouter()
@@ -17,6 +18,7 @@ const errorMessage = ref('')
 const successMessage = ref('')
 const showPassword = ref(false)
 const formRef = ref()
+const showForgotPasswordModal = ref(false)
 
 // Datos del formulario
 const formData = ref({
@@ -153,6 +155,19 @@ const handleRegister = async () => {
     throw error // Re-lanzar para que sea manejado por handleSubmit
   }
 }
+
+const handlePasswordReset = () => {
+  // Cuando se resetea la contraseña exitosamente, limpiar el formulario
+  // y mostrar mensaje informativo
+  formData.value = {
+    name: '',
+    surname: '',
+    email: '',
+    password: ''
+  }
+  successMessage.value = 'Contraseña cambiada exitosamente. Puedes iniciar sesión con tu nueva contraseña.'
+  errorMessage.value = ''
+}
 </script>
 <style scoped>
 .auth-card {
@@ -227,6 +242,18 @@ const handleRegister = async () => {
           {{ isLoginMode ? 'Iniciar Sesión' : 'Crear Cuenta' }}
         </v-btn>
 
+        <!-- Enlace de olvidé mi contraseña (solo en modo login) -->
+        <div v-if="isLoginMode" class="text-center mb-4">
+          <v-btn 
+            variant="text" 
+            @click="showForgotPasswordModal = true"
+            style="color: #F5844E; text-transform: none; font-size: 14px;"
+            size="small"
+          >
+            ¿Olvidaste tu contraseña?
+          </v-btn>
+        </div>
+
         <!-- Mensaje de error -->
         <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4" style="border-radius: 12px;">
           {{ errorMessage }}
@@ -251,6 +278,12 @@ const handleRegister = async () => {
         </div>
       </v-form>
     </v-card>
+
+    <!-- Modal de recuperación de contraseña -->
+    <ForgotPasswordModal 
+      v-model="showForgotPasswordModal"
+      @password-reset="handlePasswordReset"
+    />
   </div>
 
 </template>

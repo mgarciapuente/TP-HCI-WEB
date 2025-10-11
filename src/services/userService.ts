@@ -33,8 +33,13 @@ const handleApiResponse = async <T>(response: Response): Promise<T> => {
     let errorMessage = 'Error en la solicitud'
 
     try {
-      const errorData: ApiError = await response.json()
-      errorMessage = errorData.message || `Error ${response.status}`
+      const contentType = response.headers.get('content-type')
+      if (contentType && contentType.includes('application/json')) {
+        const errorData: ApiError = await response.json()
+        errorMessage = errorData.message || `Error ${response.status}`
+      } else {
+        errorMessage = `Error ${response.status}: ${response.statusText}`
+      }
     } catch {
       errorMessage = `Error ${response.status}: ${response.statusText}`
     }
@@ -42,7 +47,36 @@ const handleApiResponse = async <T>(response: Response): Promise<T> => {
     throw new ApiException(response.status, errorMessage)
   }
 
-  return await response.json()
+  // Para respuestas exitosas, verificar si hay contenido
+  const contentType = response.headers.get('content-type')
+  if (contentType && contentType.includes('application/json')) {
+    return await response.json()
+  } else {
+    // Para respuestas sin contenido JSON (como 200 sin body)
+    return undefined as T
+  }
+}
+
+// Función helper específica para respuestas void
+const handleVoidResponse = async (response: Response): Promise<void> => {
+  if (!response.ok) {
+    let errorMessage = 'Error en la solicitud'
+
+    try {
+      const contentType = response.headers.get('content-type')
+      if (contentType && contentType.includes('application/json')) {
+        const errorData: ApiError = await response.json()
+        errorMessage = errorData.message || `Error ${response.status}`
+      } else {
+        errorMessage = `Error ${response.status}: ${response.statusText}`
+      }
+    } catch {
+      errorMessage = `Error ${response.status}: ${response.statusText}`
+    }
+
+    throw new ApiException(response.status, errorMessage)
+  }
+  // Para respuestas void exitosas, no intentamos parsear JSON
 }
 
 // Servicio de usuario
@@ -138,18 +172,14 @@ export const userService = {
 
   // Solicitar recuperación de contraseña
   async forgotPassword(recoveryData: PasswordRecovery): Promise<void> {
-    const response = await fetch(
-      createApiUrl(API_CONFIG.ENDPOINTS.USERS.FORGOT_PASSWORD),
-      {
-        method: 'POST',
-        headers: API_CONFIG.DEFAULT_HEADERS,
-        body: new URLSearchParams({ email: recoveryData.email })
-      }
-    )
+    const url = `${createApiUrl(API_CONFIG.ENDPOINTS.USERS.FORGOT_PASSWORD)}?email=${encodeURIComponent(recoveryData.email)}`
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: API_CONFIG.DEFAULT_HEADERS,
+    })
 
-    if (!response.ok) {
-      throw new ApiException(response.status, 'Error al solicitar recuperación de contraseña')
-    }
+    return handleVoidResponse(response)
   },
 
   // Resetear contraseña
@@ -163,9 +193,7 @@ export const userService = {
       }
     )
 
-    if (!response.ok) {
-      throw new ApiException(response.status, 'Error al resetear la contraseña')
-    }
+    return handleVoidResponse(response)
   },
 
   // Cambiar contraseña (usuario autenticado)

@@ -36,17 +36,18 @@
     />
     
     <!-- Botón de logout -->
-    <v-btn 
-      @click="handleLogout" 
-      class="logout-button"
-      :loading="loggingOut"
-      block
-      size="large"
-      style="background-color: #F5844E; color: white; border-radius: 12px; margin-top: 16px;"
-    >
-      <v-icon start>mdi-logout</v-icon>
-      Cerrar sesión
-    </v-btn>
+    <div class="logout-section">
+      <v-btn 
+        @click="handleLogout" 
+        class="logout-button"
+        :loading="loggingOut"
+        size="large"
+        style="background-color: #F5844E; color: white; border-radius: 12px;"
+      >
+        <v-icon start>mdi-logout</v-icon>
+        Cerrar sesión
+      </v-btn>
+    </div>
   </div>
 </template>
 
@@ -159,8 +160,16 @@ const handleLogout = async () => {
   text-align: center;
 }
 
+.logout-section {
+  margin-top: 3rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .logout-button {
   background-color: #F5844E;
-  margin-top: 0.25em;
+  min-width: 180px;
+  max-width: 250px;
 }
 </style>
