@@ -7,6 +7,7 @@
 
       <div class="search-section mb-4">
         <SearchBar v-model="searchTerm" placeholder="Buscar productos..." :debounce-ms="500" />
+        <SearchBar v-model="searchTerm" placeholder="Buscar productos..." :debounce-ms="500" />
       </div>
 
       <CategoryFilters class="category-filters" @category-changed="handleCategoryChange" />
