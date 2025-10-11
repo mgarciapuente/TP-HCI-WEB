@@ -6,17 +6,7 @@
       </div>
 
       <div class="search-section mb-4">
-        <v-text-field
-          v-model="searchTerm"
-          label="Encontrá tus productos"
-          placeholder="Buscar productos..."
-          variant="outlined"
-          prepend-inner-icon="mdi-magnify"
-          clearable
-          hide-details
-          @update:model-value="debouncedSearch"
-          class="search-input"
-        />
+        <SearchBar v-model="searchTerm" placeholder="Buscar productos..." :debounce-ms="500" />
       </div>
 
       <CategoryFilters class="category-filters" @category-changed="handleCategoryChange" />
@@ -64,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { productsService, type Product } from '../services/productsService'
 import { useAuthStore } from '../stores/auth'
 import CategoryFilters from '../components/CategoryFilters.vue'
@@ -72,6 +62,7 @@ import ProductsGrid from '../components/ProductsGrid.vue'
 import EmptyProducts from '../components/EmptyProducts.vue'
 import AddProductModal from '../components/AddProductModal.vue'
 import EditProductModal from '../components/EditProductModal.vue'
+import SearchBar from '../components/SearchBar.vue'
 
 // Stores
 const authStore = useAuthStore()
@@ -87,15 +78,6 @@ const totalCount = ref(0)
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const selectedProduct = ref<Product | null>(null)
-
-// Función debounce personalizada
-const debounce = (func: Function, delay: number) => {
-  let timeoutId: ReturnType<typeof setTimeout>
-  return function (this: any, ...args: any[]) {
-    clearTimeout(timeoutId)
-    timeoutId = setTimeout(() => func.apply(this, args), delay)
-  }
-}
 
 // Métodos
 const loadProducts = async (resetPage = false) => {
@@ -130,14 +112,15 @@ const loadProducts = async (resetPage = false) => {
   }
 }
 
-const debouncedSearch = debounce(() => {
-  loadProducts(true)
-}, 500)
-
 const handleCategoryChange = (categoryId: number | null) => {
   selectedCategoryId.value = categoryId
   loadProducts(true)
 }
+
+// watch searchTerm to trigger search (SearchBar already debounces input)
+watch(() => searchTerm.value, () => {
+  loadProducts(true)
+})
 
 const handlePageChange = (page: number) => {
   currentPage.value = page
