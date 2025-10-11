@@ -1,5 +1,5 @@
 <template>
-  <div class="category-filters">
+  <div class="category-filters d-flex align-center flex-wrap">
     <v-chip-group
       v-model="selectedCategory"
       selected-class="text-secondary"
@@ -14,9 +14,40 @@
         :color="selectedCategory === category.id ? 'secondary' : undefined"
         :variant="selectedCategory === category.id ? 'elevated' : 'outlined'"
       >
+        <template v-slot:prepend>
+          <v-icon 
+            size="16" 
+            :color="selectedCategory === category.id ? 'white' : 'grey'"
+            class="me-1"
+          >
+            {{ getCategoryIcon(category) }}
+          </v-icon>
+        </template>
         {{ category.name }}
       </v-chip>
     </v-chip-group>
+    
+    <!-- Botón independiente para agregar nueva categoría -->
+    <v-btn
+      @click="openAddCategoryModal"
+      variant="outlined"
+      color="secondary"
+      class="add-category-btn ml-3"
+      size="small"
+    >
+      <template v-slot:prepend>
+        <v-icon size="16">
+          mdi-plus
+        </v-icon>
+      </template>
+      Agregar categoría
+    </v-btn>
+    
+    <!-- Modal para agregar categoría -->
+    <AddCategoryModal
+      v-model="showAddCategoryModal"
+      @category-created="onCategoryCreated"
+    />
   </div>
 </template>
 
@@ -24,6 +55,8 @@
 import { ref, onMounted } from 'vue'
 import { categoriesService, type Category } from '../services/productsService'
 import { useAuthStore } from '../stores/auth'
+import { useCategoryIcon } from '../composables/categoryIcons'
+import AddCategoryModal from './AddCategoryModal.vue'
 
 // Props y emits
 const emit = defineEmits<{
@@ -33,10 +66,14 @@ const emit = defineEmits<{
 // Stores
 const authStore = useAuthStore()
 
+// Composables
+const { getCategoryIcon } = useCategoryIcon()
+
 // Estado reactivo
 const categories = ref<Category[]>([])
 const selectedCategory = ref<number | null>(null)
 const loading = ref(false)
+const showAddCategoryModal = ref(false)
 
 // Métodos
 const loadCategories = async () => {
@@ -54,6 +91,18 @@ const loadCategories = async () => {
 const handleCategoryChange = (value: number | null) => {
   selectedCategory.value = value
   emit('categoryChanged', value)
+}
+
+const openAddCategoryModal = () => {
+  showAddCategoryModal.value = true
+}
+
+const onCategoryCreated = (newCategory: Category) => {
+  // Agregar la nueva categoría a la lista
+  categories.value.push(newCategory)
+  // Opcionalmente, seleccionar la nueva categoría
+  selectedCategory.value = newCategory.id
+  emit('categoryChanged', newCategory.id)
 }
 
 // Lifecycle
@@ -99,5 +148,23 @@ onMounted(() => {
   background-color: white !important;
   color: #666 !important;
   border: 1px solid #ddd !important;
+}
+
+/* Estilos específicos para el botón de agregar categoría */
+.add-category-btn {
+  border: 2px dashed rgb(var(--v-theme-secondary)) !important;
+  background-color: rgba(var(--v-theme-secondary), 0.05) !important;
+  color: rgb(var(--v-theme-secondary)) !important;
+  height: 32px !important;
+  border-radius: 24px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.add-category-btn:hover {
+  background-color: rgba(var(--v-theme-secondary), 0.1) !important;
+  border-color: rgb(var(--v-theme-secondary)) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 </style>

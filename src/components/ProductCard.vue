@@ -10,7 +10,7 @@
         color="secondary"
         class="me-3"
       >
-        mdi-package-variant
+        {{ categoryIcon }}
       </v-icon>
       
       <div class="flex-grow-1">
@@ -53,6 +53,8 @@
 
 <script setup lang="ts">
 import type { Product } from '../services/productsService'
+import { useCategoryIcon } from '../composables/categoryIcons'
+import { computed } from 'vue'
 
 // Props
 const props = defineProps<{
@@ -64,6 +66,12 @@ const emit = defineEmits<{
   edit: [product: Product]
   delete: [product: Product]
 }>()
+
+// Composables
+const { getCategoryIcon } = useCategoryIcon()
+
+// Computed
+const categoryIcon = computed(() => getCategoryIcon(props.product.category))
 
 // Métodos
 const editProduct = () => {

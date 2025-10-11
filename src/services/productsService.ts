@@ -195,10 +195,12 @@ export const categoriesService = {
   },
 
   // Crear nueva categoría
-  async createCategory(categoryData: CreateCategoryRequest) {
+  async createCategory(categoryData: CreateCategoryRequest, token?: string) {
+    const headers = token ? createAuthHeaders(token) : API_CONFIG.DEFAULT_HEADERS
+    
     const response = await fetch(createApiUrl('/api/categories'), {
       method: 'POST',
-      headers: API_CONFIG.DEFAULT_HEADERS,
+      headers,
       body: JSON.stringify(categoryData)
     })
     
