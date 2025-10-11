@@ -65,6 +65,8 @@ onMounted(() => {
 <style scoped>
 .category-filters {
   margin: 16px 0;
+  overflow-x: auto;
+  /* -webkit-overflow-scrolling: touch; */
 }
 
 :deep(.v-chip) {
@@ -99,5 +101,11 @@ onMounted(() => {
   background-color: white !important;
   color: #666 !important;
   border: 1px solid #ddd !important;
+}
+
+:deep(.v-chip-group) {
+  display: flex !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
 }
 </style>

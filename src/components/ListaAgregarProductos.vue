@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
+import SearchBar from '@/components/SearchBar.vue'
 import { useAuthStore } from '@/stores/auth'
 import { listService } from '@/services/listService'
-import { productService } from '@/services/productService'
+import { productsService } from '@/services/productsService'
 
 interface Props {
     selectedList: { id: number; name: string; products?: any[] } | null;
     addProductMode: boolean;
+    selectedCategoryId?: number | null;
 
 }
 
@@ -19,6 +21,8 @@ const auth = useAuthStore()
 const items = ref<any[]>([])
 const loading = ref(false)
 
+const searchQuery = ref('')
+
 // modal state for adding selected product to the active list
 const showAddModal = ref(false)
 const productToAdd = ref<any>(null)
@@ -29,8 +33,15 @@ const fetchProducts = async () => {
     if (!auth.token) return
     loading.value = true
     try {
-        const res = await productService.getProducts(auth.token, { page: 1, per_page: 200 })
-        items.value = Array.isArray(res) ? res as any[] : (res as any) || []
+        const params: Record<string, any> = {
+            page: 1,
+            per_page: 200
+        }
+        if (searchQuery.value && searchQuery.value.trim()) params.name = searchQuery.value.trim()
+
+        const res = await productsService.getProducts(params, auth.token || undefined)
+        
+        items.value = res.products || [];
     } catch (err) {
         console.error('Error obteniendo productos globales:', err)
         items.value = []
@@ -42,6 +53,15 @@ const fetchProducts = async () => {
 // El componente se renderiza únicamente cuando addProductMode === true (v-if en el padre),
 // por lo que basta con cargar los productos al montarse.
 onMounted(() => {
+    fetchProducts()
+})
+
+watch(() => props.selectedCategoryId, () => {
+    fetchProducts()
+})
+
+watch(() => searchQuery.value, () => {
+    // simple immediate search; can debounce if needed
     fetchProducts()
 })
 
@@ -151,6 +171,9 @@ const confirmAdd = async () => {
         <div class="products-header">
             <h2 class="panel-title">Productos</h2>
         </div>
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:0.5rem;">
+            <SearchBar v-model="searchQuery" placeholder="Buscar producto..." :debounce-ms="500" />
+        </div>
         <div class="products-scroll">
             <div v-if="loading" class="loading">Cargando...</div>
 
@@ -161,7 +184,8 @@ const confirmAdd = async () => {
             </div>
 
             <div v-else class="products-list">
-                <v-card v-for="product in items" :key="product.id" class="product-item" variant="flat" color="backgroundColor">
+                <v-card v-for="product in items" :key="product.id" class="product-item" variant="flat"
+                    color="backgroundColor">
                     <v-card-text class="product-content">
                         <div class="product-info">
                             <h3 class="product-name">{{ product.name || product.product?.name }}</h3>

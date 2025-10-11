@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CreateListModal from './CreateListModal.vue';
 import { ref, defineProps, onMounted } from 'vue';
+import { purchasesService } from '@/services/purchasesService'
 import { useAuthStore } from '@/stores/auth'
 import { listService } from '@/services/listService'
 
@@ -12,14 +13,19 @@ interface CreateList {
 
 interface Props {
     selectedList: { id: number; name: string; products: any[] } | null;
+    selectedPurchase?: { id: number; list?: any } | null;
     listItems: { id: number; name: string; products: any[] }[];
-    handleSelectList: (list: { id: number; name: string; products: any[] }) => void;
-    openHistory: () => void;
+    handleSelectList?: (list: { id: number; name: string; products: any[] }) => void;
+    historyMode?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props & { historyMode?: boolean }>();
 const emit = defineEmits<{
     (e: 'count-changed', count: number): void
+    (e: 'list-restored', restoredList: any): void
+    (e: 'toggle-history'): void
+    // unified select event
+    (e: 'select', payload: { kind: 'list' | 'purchase', payload: any }): void
 }>()
 const isModalVisible = ref(false);
 
@@ -31,17 +37,26 @@ const getLists = async () => {
     if (!auth.token) return
     loading.value = true
     try {
-        // Usamos el servicio de listas; el endpoint devuelve estructura paginada o array
-        const res = await listService.getLists(auth.token)
-        // Si viene paginado, intentar mapear a array
+        // If historyMode is true, request purchased/completed lists
+        const params: Record<string, any> = {}
+        let res;
+        if (props.historyMode) {
+            // Obtener las compras y mapear a listas, preservando purchaseId para poder pedir la compra completa
+            const purchases = await purchasesService.getPurchases(auth.token, params);
+            res = purchases.map((p: any) => ({ ...(p.list || {}), purchaseId: p.id, purchase: p }));
+            console.log(res)
+        } else {
+            // Obtener las listas normalmente
+            res = await listService.getLists(auth.token, params);
+        }
+        console.log(res);
+        // If paginated, map to array
         if (Array.isArray(res)) {
             lists.value = res as any
-        } else if (res && (res as any).data) {
-            lists.value = (res as any).data
         } else {
             lists.value = []
         }
-        // Emitir la cantidad de listas para que el padre ajuste el layout
+        // Emit count
         const count = lists.value.length
         const emitCount = (event: string, payload: any) => {
             // @ts-ignore
@@ -60,6 +75,42 @@ defineExpose({ refresh: getLists })
 
 const handleOpen = () => {
     isModalVisible.value = true
+}
+
+const onSelect = (list: any) => {
+    if (props.historyMode) {
+        const purchaseId = list.purchaseId ?? list.id
+        emit('select', { kind: 'purchase', payload: { purchaseId, purchase: list.purchase ?? null } })
+    } else {
+        emit('select', { kind: 'list', payload: list })
+        if (props.handleSelectList && typeof props.handleSelectList === 'function') {
+            props.handleSelectList(list)
+        }
+    }
+}
+
+const restoreList = async (purchase: any) => {
+    if (!auth.token) return
+    try {
+        // Determine purchaseId and candidate listId from the record
+        const purchaseId = purchase.id
+        let restoredList: any = purchase.list
+
+        // Try purchasesService first; if it returns the purchase with embedded list, extract it
+        if (purchaseId) {
+            try {
+                await purchasesService.restorePurchase(auth.token, purchaseId)
+            } catch (e) {
+                console.warn('purchasesService.restorePurchase failed, will try reset fallback', e)
+            }
+        }
+        emit('list-restored', restoredList)
+
+        // Refresh current view (still historyMode here). Parent will toggle history and refresh again.
+        await getLists()
+    } catch (err) {
+        console.error('Error restoring list:', err)
+    }
 }
 
 const handleConfirm = async (data: CreateList) => {
@@ -82,7 +133,9 @@ const handleDelete = async (id: number) => {
         await getLists()
         // deseleccionar si era la lista seleccionada
         if (props.selectedList && props.selectedList.id === id) {
-            props.handleSelectList(null as any)
+            if (props.handleSelectList && typeof props.handleSelectList === 'function') {
+                props.handleSelectList(null as any)
+            }
         }
     } catch (err) {
         console.error('Error eliminando lista:', err)
@@ -149,12 +202,13 @@ onMounted(() => {
 </style>
 
 <template>
-    <CreateListModal v-model="isModalVisible" @confirm="handleConfirm" />
+    <CreateListModal v-model="isModalVisible" @confirm="handleConfirm" v-if="!props.historyMode" />
 
     <div class="lists-panel">
         <div class="lists-header">
-            <h2 class="panel-title">Listas</h2>
-            <v-btn icon="mdi-history" color="black" variant="text" class="history-button" @click="props.openHistory()">
+            <h2 class="panel-title">{{ props.historyMode ? 'Historial' : 'Listas' }}</h2>
+            <v-btn icon="mdi-history" color="black" variant="text" class="history-button" @click="emit('toggle-history')">
+                <v-icon>mdi-history</v-icon>
             </v-btn>
         </div>
         <div v-if="lists.length === 0" class="empty-content">
@@ -169,7 +223,7 @@ onMounted(() => {
         <div v-else class="lists-scroll">
             <v-card v-for="list in lists" :key="list.id" class="list-item"
                 :class="{ 'selected': props.selectedList && props.selectedList.id === list.id }" color="primary"
-                @click="props.handleSelectList(list)">
+                @click="onSelect(list)">
                 <v-card-text class="list-item-content">
                     <v-icon class="list-icon" color="white">mdi-format-list-bulleted</v-icon>
                     <div>
@@ -177,11 +231,12 @@ onMounted(() => {
                         <div class="list-count">{{ (list.products && list.products.length) || 'Sin' }} Productos</div>
                     </div>
                     <v-spacer />
-                    <v-btn icon="mdi-delete" variant="text" color="white" @click.stop="handleDelete(list.id)" />
+                    <v-btn v-if="!props.historyMode" icon="mdi-delete" variant="text" color="white" @click.stop="handleDelete(list.id)" />
+                    <v-btn v-if="props.historyMode" icon="mdi-backup-restore" variant="text" color="white" @click.stop="restoreList(list)" />
                 </v-card-text>
             </v-card>
         </div>
-        <v-btn color="secondary" class="fab-button-left" size="large" icon="mdi-playlist-plus" fab @click="handleOpen">
+        <v-btn v-if="!props.historyMode" color="secondary" class="fab-button-left" size="large" icon="mdi-playlist-plus" fab @click="handleOpen">
         </v-btn>
     </div>
 </template>
