@@ -4,7 +4,31 @@ import CategoryFilters from './CategoryFilters.vue'
 import { useAuthStore } from '@/stores/auth'
 import { listService } from '@/services/listService'
 import { purchasesService } from '@/services/purchasesService'
+import CantidadModal from './CantidadModal.vue'
 import type { ListItem } from '@/types/listTypes'
+
+const editItemModal = ref(false)
+const itemToEdit = ref<ListItem | null>(null)
+
+const openEditItemModal = (item: ListItem) => {
+    itemToEdit.value = item
+    editItemModal.value = true
+}
+
+const handleItemEdit = async (payload: { quantity: number, unit: string }) => {
+    if (!auth.token || !props.selectedList || !itemToEdit.value) return
+    saveLoading.value = true
+    try {
+        await listService.updateListItem(auth.token, props.selectedList.id, itemToEdit.value.id, payload)
+        await fetchItems()
+        editItemModal.value = false
+        itemToEdit.value = null
+    } catch (err) {
+        errorSnackbar.value = { show: true, text: 'No se pudo editar el producto' }
+    } finally {
+        saveLoading.value = false
+    }
+}
 
 interface Props {
     selectedList: { id: number; name: string; products?: any[] } | null;
@@ -22,6 +46,10 @@ const emit = defineEmits<{
 
 const auth = useAuthStore()
 const items = ref<ListItem[]>([])
+const editMode = ref(false)
+const editedName = ref('')
+const itemsToDelete = ref<number[]>([])
+const saveLoading = ref(false)
 const loading = ref(false)
 const selectedCategoryId = ref<number | null>(null)
 const errorSnackbar = ref({ show: false, text: '' })
@@ -40,10 +68,11 @@ const fetchItems = async () => {
         // If we're viewing history, the items live under the purchase resource: purchase.list.items
         if (props.historyMode && props.selectedPurchase) {
             try {
-                const res: any = await purchasesService.getPurchase(auth.token, props.selectedPurchase.id)
-                const purchaseListItems = res?.list?.items || []
+                const res: any = await purchasesService.getPurchase(auth.token, props.selectedPurchase.purchaseId)
+                console.log(res);
+                const purchaseListItems = res?.items || []
                 items.value = purchaseListItems
-                // Apply category filter client-side if present
+                console.log(purchaseListItems);
             } catch (err) {
                 console.error('Error al obtener purchase para historial:', err)
                 items.value = []
@@ -67,7 +96,7 @@ const fetchItems = async () => {
     }
 }
 
-watch(() => props.selectedList, () => {
+watch(() => props.selectedPurchase?.id, () => {
     fetchItems()
 }, { immediate: true })
 
@@ -95,6 +124,48 @@ const togglePurchased = async (item: ListItem) => {
     }
 }
 
+const startEdit = () => {
+    editMode.value = true
+    editedName.value = props.selectedList?.name || ''
+    itemsToDelete.value = []
+}
+
+const markForDelete = (itemId: number) => {
+    if (!itemsToDelete.value.includes(itemId)) {
+        itemsToDelete.value.push(itemId)
+    }
+}
+
+const unmarkForDelete = (itemId: number) => {
+    itemsToDelete.value = itemsToDelete.value.filter(id => id !== itemId)
+}
+
+const saveEdit = async () => {
+    if (!auth.token || !props.selectedList) return
+    saveLoading.value = true
+    try {
+        // Actualizar nombre si cambió
+        if (editedName.value !== props.selectedList.name) {
+            await listService.updateList(auth.token ?? '', props.selectedList.id, { name: editedName.value })
+        }
+        // Eliminar productos marcados
+        for (const itemId of itemsToDelete.value) {
+            await listService.deleteListItem(auth.token ?? '', props.selectedList.id, itemId)
+        }
+        await fetchItems()
+        editMode.value = false
+    } catch (err) {
+        errorSnackbar.value = { show: true, text: 'No se pudo guardar los cambios' }
+    } finally {
+        saveLoading.value = false
+    }
+}
+
+const cancelEdit = () => {
+    editedName.value = props.selectedList?.name || ''
+    itemsToDelete.value = []
+    editMode.value = false
+}
 // handleOpen removed
 
 // Exponer refresh para que el padre pueda forzar recarga
@@ -175,15 +246,39 @@ defineExpose({ refresh: fetchItems })
 </style>
 
 <template>
+    <CantidadModal
+        :model-value="editItemModal"
+        :quantity="itemToEdit?.quantity || 1"
+        :unit="itemToEdit?.unit || 'unidades'"
+        :mode="'edit'"
+        :title="'Editar ' + (itemToEdit?.product?.name || '')"
+        @update:modelValue="editItemModal = $event"
+        @save="handleItemEdit"
+    />
     <div class="products-panel">
         <div class="products-header">
             <div class="header-top">
                 <v-btn v-if="props.addProductMode" icon @click="emit('exit-add-mode')">
                     <v-icon>mdi-arrow-left</v-icon>
                 </v-btn>
-                <h2 class="panel-title">{{ props.selectedList?.name }}</h2>
+                <h2 class="panel-title" style="display: flex; align-items: center; gap: 8px;">
+                    <template v-if="editMode">
+                        <v-text-field v-model="editedName" density="compact" variant="outlined" hide-details
+                            style="max-width: 300px;" />
+                        <v-btn color="primary" size="small" @click="saveEdit" :loading="saveLoading"
+                            style="margin-left: 8px;">Guardar</v-btn>
+                        <v-btn size="small" variant="text" @click="cancelEdit">Cancelar</v-btn>
+                    </template>
+                    <template v-else>
+                        <span>{{ props.historyMode ? props.selectedPurchase.name : props.selectedList?.name }}</span>
+                        <v-btn v-if="!props.historyMode && !editMode && props.selectedList" icon size="small"
+                            variant="text" @click="startEdit" aria-label="Editar lista">
+                            <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                    </template>
+                </h2>
             </div>
-            <CategoryFilters @categoryChanged="onCategoryChanged" />
+            <CategoryFilters v-if="!props.historyMode" @categoryChanged="onCategoryChanged" />
         </div>
         <div class="products-scroll">
             <div v-if="loading" class="loading">Cargando...</div>
@@ -203,14 +298,22 @@ defineExpose({ refresh: fetchItems })
                             <p class="product-details">{{ product.quantity }} {{ product.unit }}</p>
                         </div>
                     </v-card-text>
-                        <v-checkbox v-if="!props.historyMode" :model-value="product.purchased" density="compact" hide-details
-                            @click="togglePurchased(product)" />
+                    <v-btn v-if="editMode" icon size="small" color="error" @click="markForDelete(product.id)"
+                        aria-label="Eliminar producto">
+                        <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                    <v-btn v-if="editMode" icon size="small" color="primary" @click="openEditItemModal(product)"
+                        aria-label="Editar cantidad">
+                        <v-icon>mdi-pencil</v-icon>
+                    </v-btn>
+                    <v-checkbox v-else-if="!props.historyMode" :model-value="product.purchased" density="compact"
+                        hide-details @click="togglePurchased(product)" />
                 </v-card>
             </div>
         </div>
-        <v-btn v-if="!props.historyMode" color="secondary" class="fab-button-right" size="large" icon="mdi-playlist-plus" fab
-                @click="emit('enter-add-mode')">
-            </v-btn>
+        <v-btn v-if="!props.historyMode" color="secondary" class="fab-button-right" size="large"
+            icon="mdi-playlist-plus" fab @click="emit('enter-add-mode')">
+        </v-btn>
 
         <v-snackbar v-model="errorSnackbar.show" color="error" timeout="4000">
             {{ errorSnackbar.text }}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
+import CantidadModal from './CantidadModal.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { useAuthStore } from '@/stores/auth'
 import { listService } from '@/services/listService'
@@ -198,24 +199,14 @@ const confirmAdd = async () => {
             </div>
         </div>
 
-        <!-- Dialog para ingresar cantidad y unidad al agregar -->
-        <v-dialog v-model="showAddModal" max-width="420">
-            <v-card>
-                <v-card-title>Agregar "{{ productToAdd?.name || productToAdd?.product?.name }}"</v-card-title>
-                <v-card-text>
-                    <v-form>
-                        <v-text-field v-model.number="addForm.quantity" label="Cantidad" type="number" min="0.01"
-                            step="0.01" />
-                        <v-select v-model="addForm.unit" :items="['unidades', 'kg', 'gr', 'lt', 'ml', 'paquete']"
-                            label="Unidad" />
-                    </v-form>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer />
-                    <v-btn variant="outlined" @click="showAddModal = false">Cancelar</v-btn>
-                    <v-btn color="primary" @click="confirmAdd">Agregar</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+                        <CantidadModal
+                            :model-value="showAddModal"
+                            :quantity="addForm.quantity"
+                            :unit="addForm.unit"
+                            :mode="'add'"
+                            :title="'Agregar ' + (productToAdd?.name || productToAdd?.product?.name || '')"
+                            @update:modelValue="showAddModal = $event"
+                            @save="({ quantity, unit }) => { addForm.quantity = quantity; addForm.unit = unit; confirmAdd(); }"
+                        />
     </div>
 </template>

@@ -63,9 +63,10 @@ const handleSelect = (payload: { kind: 'list' | 'purchase', payload: any }) => {
     selectedPurchase.value = null
     selectedList.value = payload.payload as Lista
   } else if (payload.kind === 'purchase') {
+    console.log('Selected purchase from history:', payload.payload);
     // When a purchase is selected from history, clear selectedList and set selectedPurchase
     selectedList.value = null
-    selectedPurchase.value = payload.payload.purchase || { id: payload.payload.purchaseId, list: payload.payload.purchase?.list }
+    selectedPurchase.value = payload.payload as Purchase
   }
 }
 
@@ -94,7 +95,29 @@ const handleCategoryChanged = (id: number | null) => {
 }
 
 const handleListRestored = async (restored: any) => {
-  // Exit history mode so restored list appears in the normal lists
+  // If currently viewing history, remain in history: deselect the purchase and refresh purchases
+  if (showHistory.value) {
+    // Deselect any currently selected purchase
+    selectedPurchase.value = null
+
+    // Refresh purchases list so restored list disappears from history
+    if (listasComponent.value && typeof listasComponent.value.refresh === 'function') {
+      await listasComponent.value.refresh()
+    }
+
+    // Refresh products panel (will be empty since no purchase selected)
+    if (productosComponent.value && typeof productosComponent.value.refresh === 'function') {
+      await productosComponent.value.refresh()
+    }
+
+    // Show snackbar with restored list name if available
+    const listName = restored?.name || restored?.list?.name || 'Lista restaurada'
+    snackbar.value = { show: true, text: `${listName} restaurada`, color: 'success' }
+
+    return
+  }
+
+  // Default behavior (not in history): exit history and select restored list
   showHistory.value = false
 
   // Try to fetch the canonical list data from the API if we have an id

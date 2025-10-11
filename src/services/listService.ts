@@ -48,6 +48,29 @@ const handleApiResponse = async <T>(response: Response): Promise<T> => {
 }
 
 export const listService = {
+  // Editar cantidad y unidad de un item de la lista
+  async updateListItem(token: string, listId: number, itemId: number, payload: { quantity: number, unit: string }): Promise<ListItem> {
+    const response = await fetch(
+      createApiUrl(`${API_CONFIG.ENDPOINTS.LISTS.ROOT}/${listId}/items/${itemId}`),
+      {
+        method: 'PUT',
+        headers: createAuthHeaders(token),
+        body: JSON.stringify(payload)
+      }
+    )
+    return handleApiResponse<ListItem>(response)
+  },
+  // Eliminar un item de la lista
+  async deleteListItem(token: string, listId: number, itemId: number): Promise<void> {
+    const response = await fetch(
+      createApiUrl(`${API_CONFIG.ENDPOINTS.LISTS.ROOT}/${listId}/items/${itemId}`),
+      {
+        method: 'DELETE',
+        headers: createAuthHeaders(token)
+      }
+    )
+    return handleApiResponse<void>(response)
+  },
 
   // Crear nueva lista
   async createList(token: string, payload: ShoppingListCreate): Promise<ShoppingList> {

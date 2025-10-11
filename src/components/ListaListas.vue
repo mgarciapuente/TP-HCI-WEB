@@ -43,13 +43,12 @@ const getLists = async () => {
         if (props.historyMode) {
             // Obtener las compras y mapear a listas, preservando purchaseId para poder pedir la compra completa
             const purchases = await purchasesService.getPurchases(auth.token, params);
-            res = purchases.map((p: any) => ({ ...(p.list || {}), purchaseId: p.id, purchase: p }));
+            res = purchases.map((p: any) => ({ ...(p.list || {}), purchaseId: p.id}));
             console.log(res)
         } else {
             // Obtener las listas normalmente
             res = await listService.getLists(auth.token, params);
         }
-        console.log(res);
         // If paginated, map to array
         if (Array.isArray(res)) {
             lists.value = res as any
@@ -78,22 +77,14 @@ const handleOpen = () => {
 }
 
 const onSelect = (list: any) => {
-    if (props.historyMode) {
-        const purchaseId = list.purchaseId ?? list.id
-        emit('select', { kind: 'purchase', payload: { purchaseId, purchase: list.purchase ?? null } })
-    } else {
-        emit('select', { kind: 'list', payload: list })
-        if (props.handleSelectList && typeof props.handleSelectList === 'function') {
-            props.handleSelectList(list)
-        }
-    }
+    emit('select', { kind: props.historyMode ? 'purchase' : 'list', payload: list })
 }
 
 const restoreList = async (purchase: any) => {
     if (!auth.token) return
     try {
         // Determine purchaseId and candidate listId from the record
-        const purchaseId = purchase.id
+        const purchaseId = purchase.purchaseId
         let restoredList: any = purchase.list
 
         // Try purchasesService first; if it returns the purchase with embedded list, extract it
@@ -184,6 +175,10 @@ onMounted(() => {
     border-color: transparent;
 }
 
+.list-text {
+    margin: 0 2em;
+}
+
 .list-item-content {
     display: flex;
     justify-content: space-between;
@@ -226,9 +221,9 @@ onMounted(() => {
                 @click="onSelect(list)">
                 <v-card-text class="list-item-content">
                     <v-icon class="list-icon" color="white">mdi-format-list-bulleted</v-icon>
-                    <div>
-                        <div class="list-name">{{ list.name }}</div>
-                        <div class="list-count">{{ (list.products && list.products.length) || 'Sin' }} Productos</div>
+                    <div class="list-text">
+                        <h3 class="list-name">{{ list.name }}</h3>
+                        <p class="list-count">{{ (list.products && list.products.length) || 'Sin' }} Productos</p>
                     </div>
                     <v-spacer />
                     <v-btn v-if="!props.historyMode" icon="mdi-delete" variant="text" color="white" @click.stop="handleDelete(list.id)" />
