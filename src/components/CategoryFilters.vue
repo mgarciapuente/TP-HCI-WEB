@@ -31,35 +31,41 @@
         
         <span class="category-name">{{ category.name }}</span>
         
-        <!-- Mostrar menú de opciones cuando tiene hover, sino dejar que Vuetify maneje el tilde -->
-        <template v-slot:append v-if="hoveredCategory === category.id">
-          <v-menu>
+        <!-- Menú de opciones siempre visible pero sutil -->
+        <template v-slot:append>
+          <v-menu 
+            :open-on-hover="false" 
+            :close-on-content-click="true"
+            location="bottom end"
+            offset="4"
+          >
             <template v-slot:activator="{ props }">
               <v-btn
                 icon="mdi-dots-horizontal"
                 variant="text"
                 size="x-small"
-                :color="selectedCategory === category.id ? 'white' : 'grey'"
+                :color="selectedCategory === category.id ? 'white' : 'grey-lighten-1'"
                 v-bind="props"
                 class="ms-1 menu-trigger"
+                :class="{ 'menu-visible': hoveredCategory === category.id }"
                 @click.stop
               />
             </template>
             
-            <v-list density="compact">
-              <v-list-item @click="editCategory(category)" class="cursor-pointer">
-                <template v-slot:prepend>
-                  <v-icon size="16">mdi-pencil</v-icon>
-                </template>
-                <v-list-item-title>Editar</v-list-item-title>
-              </v-list-item>
+            <v-list density="compact" class="py-1">
+              <v-list-item 
+                @click="editCategory(category)" 
+                class="cursor-pointer"
+                prepend-icon="mdi-pencil"
+                title="Editar"
+              />
               
-              <v-list-item @click="deleteCategory(category)" class="cursor-pointer text-red">
-                <template v-slot:prepend>
-                  <v-icon size="16" color="red">mdi-delete</v-icon>
-                </template>
-                <v-list-item-title>Eliminar</v-list-item-title>
-              </v-list-item>
+              <v-list-item 
+                @click="deleteCategory(category)" 
+                class="cursor-pointer text-red"
+                prepend-icon="mdi-delete"
+                title="Eliminar"
+              />
             </v-list>
           </v-menu>
         </template>
@@ -88,6 +94,13 @@
       v-model="showAddCategoryModal"
       @category-created="onCategoryCreated"
     />
+    
+    <!-- Modal para editar categoría -->
+    <EditCategoryModal
+      v-model="showEditCategoryModal"
+      :category="categoryToEdit"
+      @category-updated="onCategoryUpdated"
+    />
   </div>
 </template>
 
@@ -97,6 +110,7 @@ import { categoriesService, type Category } from '../services/productsService'
 import { useAuthStore } from '../stores/auth'
 import { useCategoryIcon } from '../composables/categoryIcons'
 import AddCategoryModal from './AddCategoryModal.vue'
+import EditCategoryModal from './EditCategoryModal.vue'
 
 // Props y emits
 const emit = defineEmits<{
@@ -114,6 +128,8 @@ const categories = ref<Category[]>([])
 const selectedCategory = ref<number | null>(null)
 const loading = ref(false)
 const showAddCategoryModal = ref(false)
+const showEditCategoryModal = ref(false)
+const categoryToEdit = ref<Category | null>(null)
 const hoveredCategory = ref<number | null>(null)
 
 // Métodos
@@ -146,15 +162,30 @@ const onCategoryCreated = (newCategory: Category) => {
   emit('categoryChanged', newCategory.id)
 }
 
+const onCategoryUpdated = (updatedCategory: Category) => {
+  // Encontrar y actualizar la categoría en la lista
+  const index = categories.value.findIndex(cat => cat.id === updatedCategory.id)
+  if (index !== -1) {
+    categories.value[index] = updatedCategory
+  }
+  
+  // Si la categoría actualizada está seleccionada, mantener la selección
+  if (selectedCategory.value === updatedCategory.id) {
+    emit('categoryChanged', updatedCategory.id)
+  }
+}
+
 const editCategory = (category: Category) => {
-  // TODO: Implementar edición de categoría
-  console.log('Editar categoría:', category.name)
+  categoryToEdit.value = category
+  showEditCategoryModal.value = true
 }
 
 const deleteCategory = (category: Category) => {
   // TODO: Implementar eliminación de categoría
   console.log('Eliminar categoría:', category.name)
 }
+
+// El menú ahora siempre está disponible, no necesitamos funciones de hover especiales
 
 // Lifecycle
 onMounted(() => {
@@ -264,12 +295,23 @@ onMounted(() => {
 
 /* Estilo para el botón del menú */
 :deep(.menu-trigger) {
-  opacity: 0.8 !important;
-  transition: opacity 0.2s ease !important;
+  opacity: 0.6 !important;
+  transition: all 0.2s ease !important;
 }
 
 :deep(.menu-trigger:hover) {
   opacity: 1 !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Hacer el menú más visible cuando hay hover en el chip */
+.category-chip:hover :deep(.menu-trigger) {
+  opacity: 0.9 !important;
+}
+
+.category-chip:hover :deep(.menu-trigger.menu-visible) {
+  opacity: 1 !important;
+  background-color: rgba(0, 0, 0, 0.15) !important;
 }
 
 /* Estilo para la lista del menú */

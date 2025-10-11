@@ -2,8 +2,8 @@
   <v-dialog v-model="dialog" max-width="500" persistent>
     <v-card>
       <v-card-title class="d-flex align-center pa-4">
-        <v-icon start color="secondary">mdi-tag-plus</v-icon>
-        Agregar Nueva Categoría
+        <v-icon start color="secondary">mdi-pencil</v-icon>
+        Editar Categoría
       </v-card-title>
       
       <v-card-text class="pa-4">
@@ -43,6 +43,7 @@
                 <template v-slot:prepend>
                   <v-icon :icon="item.raw.icon" size="20" class="me-3" color="primary" />
                 </template>
+                <v-list-item-title>{{ item.raw.displayName }}</v-list-item-title>
               </v-list-item>
             </template>
           </v-select>
@@ -61,7 +62,7 @@
           :disabled="!valid || loading"
           :loading="loading"
         >
-          Agregar Categoría
+          Guardar Cambios
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -70,25 +71,26 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch, computed, onMounted } from 'vue'
-import { categoriesService, type CreateCategoryRequest, type Category } from '../services/productsService'
+import { categoriesService, type Category } from '../services/productsService'
 import { useAuthStore } from '../stores/auth'
 import { useCategoryIcon } from '../composables/categoryIcons'
 
 // Props y emits
 const props = defineProps<{
   modelValue: boolean
+  category: Category | null
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  'categoryCreated': [category: Category]
+  'categoryUpdated': [category: Category]
 }>()
 
 // Stores
 const authStore = useAuthStore()
 
 // Composables
-const { getAvailableIcons } = useCategoryIcon()
+const { getAvailableIcons, getCategoryIcon } = useCategoryIcon()
 
 // Estado reactivo
 const dialog = ref(props.modelValue)
@@ -115,7 +117,27 @@ const iconRules = [
 
 // Computed para iconos disponibles
 const availableIconsForSelection = computed(() => {
-  const availableIcons = getAvailableIcons(existingCategories.value)
+  // Filtrar las categorías existentes excluyendo la que estamos editando
+  const otherCategories = existingCategories.value.filter(cat => cat.id !== props.category?.id)
+  const availableIcons = getAvailableIcons(otherCategories)
+  
+  // Si la categoría actual tiene un icono, incluirlo en las opciones disponibles
+  if (props.category) {
+    const currentIcon = getCategoryIcon(props.category)
+    const isCurrentIconInList = availableIcons.some(icon => icon.icon === currentIcon)
+    
+    if (!isCurrentIconInList) {
+      // Buscar el nombre del icono actual en la lista completa
+      const { getAllAvailableIcons } = useCategoryIcon()
+      const allIcons = getAllAvailableIcons()
+      const currentIconData = allIcons.find(icon => icon.icon === currentIcon)
+      
+      if (currentIconData) {
+        availableIcons.unshift(currentIconData)
+      }
+    }
+  }
+  
   return availableIcons.map(iconData => ({
     ...iconData,
     displayName: iconData.name
@@ -125,9 +147,9 @@ const availableIconsForSelection = computed(() => {
 // Watchers
 watch(() => props.modelValue, async (newVal) => {
   dialog.value = newVal
-  if (newVal) {
+  if (newVal && props.category) {
     await loadExistingCategories()
-    resetForm()
+    initializeForm()
   }
 })
 
@@ -151,9 +173,12 @@ const loadExistingCategories = async () => {
   }
 }
 
-const resetForm = () => {
-  categoryForm.name = ''
-  categoryForm.selectedIcon = ''
+const initializeForm = () => {
+  if (props.category) {
+    categoryForm.name = props.category.name
+    categoryForm.selectedIcon = getCategoryIcon(props.category)
+  }
+  
   if (formRef.value) {
     formRef.value.resetValidation()
   }
@@ -164,25 +189,26 @@ const handleCancel = () => {
 }
 
 const handleSubmit = async () => {
-  if (!valid.value) return
+  if (!valid.value || !props.category) return
 
   try {
     loading.value = true
     
-    const createRequest: CreateCategoryRequest = {
+    const updateRequest = {
       name: categoryForm.name.trim(),
       metadata: {
+        ...props.category.metadata,
         icon: categoryForm.selectedIcon
       }
     }
     
-    const newCategory = await categoriesService.createCategory(createRequest, authStore.token || undefined)
+    const updatedCategory = await categoriesService.updateCategory(props.category.id, updateRequest, authStore.token || undefined)
     
-    emit('categoryCreated', newCategory)
+    emit('categoryUpdated', updatedCategory)
     dialog.value = false
     
   } catch (error) {
-    console.error('Error al crear categoría:', error)
+    console.error('Error al actualizar categoría:', error)
     // Aquí podrías mostrar una notificación de error
   } finally {
     loading.value = false

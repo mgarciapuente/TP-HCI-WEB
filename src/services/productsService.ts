@@ -209,5 +209,22 @@ export const categoriesService = {
     }
     
     return response.json() as Promise<Category>
+  },
+
+  // Actualizar categoría existente
+  async updateCategory(categoryId: number, categoryData: CreateCategoryRequest, token?: string) {
+    const headers = token ? createAuthHeaders(token) : API_CONFIG.DEFAULT_HEADERS
+    
+    const response = await fetch(createApiUrl(`/api/categories/${categoryId}`), {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(categoryData)
+    })
+    
+    if (!response.ok) {
+      throw new Error('Error al actualizar categoría')
+    }
+    
+    return response.json() as Promise<Category>
   }
 }
