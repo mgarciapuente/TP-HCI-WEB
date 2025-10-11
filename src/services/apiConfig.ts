@@ -16,6 +16,9 @@ export const API_CONFIG = {
       SEND_VERIFICATION: '/api/users/send-verification',
       CHANGE_PASSWORD: '/api/users/change-password',
       LOGOUT: '/api/users/logout'
+    },
+    LISTS: {
+      ROOT: '/api/shopping-lists'
     }
   },
   

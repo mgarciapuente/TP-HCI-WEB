@@ -16,8 +16,10 @@
 
   /* Color palette (custom) */
   --color-orange: #F5844E;
-  --color-orange-hover: #F79B66; /* lighter orange for hover */
-  --color-orange-light: #F9A877; /* even lighter for chip style */
+  --color-orange-hover: #F79B66;
+  /* lighter orange for hover */
+  --color-orange-light: #F9A877;
+  /* even lighter for chip style */
   --color-green-dark: #465D46;
   --color-green-mid: #7A9A7A;
   --color-green-light: #DCE5DC;
@@ -28,6 +30,7 @@ a {
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
@@ -60,9 +63,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
@@ -96,14 +101,20 @@ html {
   height: 100vh !important;
 }
 
+&::-webkit-scrollbar {
+  display: none;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
   }
