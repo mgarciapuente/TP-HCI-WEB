@@ -134,6 +134,31 @@ export const productsService = {
     }
     
     return response.ok
+  },
+
+  // Reasignar productos de una categoría a otra
+  async reassignProductsToCategory(fromCategoryId: number, toCategoryId: number, token?: string): Promise<void> {
+    try {
+      // Obtener todos los productos de la categoría origen
+      const productsResponse = await this.getProducts({ category_id: fromCategoryId, per_page: 1000 }, token)
+      const products = productsResponse.products
+      
+      // Reasignar cada producto a la nueva categoría
+      for (const product of products) {
+        const updateRequest: CreateProductRequest = {
+          name: product.name,
+          metadata: product.metadata,
+          category: {
+            id: toCategoryId
+          }
+        }
+        
+        await this.updateProduct(product.id, updateRequest, token)
+      }
+    } catch (error) {
+      console.error('Error al reasignar productos:', error)
+      throw new Error('Error al reasignar productos a nueva categoría')
+    }
   }
 }
 
@@ -226,5 +251,50 @@ export const categoriesService = {
     }
     
     return response.json() as Promise<Category>
+  },
+
+  // Eliminar categoría
+  async deleteCategory(categoryId: number, token?: string) {
+    const headers = token ? createAuthHeaders(token) : API_CONFIG.DEFAULT_HEADERS
+    
+    const response = await fetch(createApiUrl(`/api/categories/${categoryId}`), {
+      method: 'DELETE',
+      headers
+    })
+    
+    if (!response.ok) {
+      throw new Error('Error al eliminar categoría')
+    }
+    
+    return response.ok
+  },
+
+  // Obtener o crear categoría "Sin categoría"
+  async getOrCreateDefaultCategory(token?: string): Promise<Category> {
+    const defaultCategoryName = 'Sin categoría'
+    
+    try {
+      // Primero intentar obtener la categoría existente
+      const response = await this.getCategories({ name: defaultCategoryName, per_page: 1 }, token)
+      const existingCategory = response.categories.find((cat: Category) => cat.name === defaultCategoryName)
+      
+      if (existingCategory) {
+        return existingCategory
+      }
+      
+      // Si no existe, crearla
+      const createRequest: CreateCategoryRequest = {
+        name: defaultCategoryName,
+        metadata: {
+          icon: 'mdi-package-variant',
+          isDefaultCategory: true
+        }
+      }
+      
+      return await this.createCategory(createRequest, token)
+    } catch (error) {
+      console.error('Error al obtener/crear categoría default:', error)
+      throw new Error('Error al obtener categoría "Sin categoría"')
+    }
   }
 }

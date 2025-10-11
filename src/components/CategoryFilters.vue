@@ -16,8 +16,8 @@
         :color="selectedCategory === category.id ? 'secondary' : undefined"
         :variant="selectedCategory === category.id ? 'elevated' : 'outlined'"
         class="category-chip"
-        @mouseenter="hoveredCategory = category.id"
-        @mouseleave="hoveredCategory = null"
+        @mouseenter="handleChipMouseEnter(category.id)"
+        @mouseleave="handleChipMouseLeave"
       >
         <template v-slot:prepend>
           <v-icon 
@@ -31,8 +31,8 @@
         
         <span class="category-name">{{ category.name }}</span>
         
-        <!-- Menú de opciones siempre visible pero sutil -->
-        <template v-slot:append>
+        <!-- Menú de opciones visible solo con hover -->
+        <template v-slot:append v-if="hoveredCategory === category.id">
           <v-menu 
             :open-on-hover="false" 
             :close-on-content-click="true"
@@ -47,12 +47,17 @@
                 :color="selectedCategory === category.id ? 'white' : 'grey-lighten-1'"
                 v-bind="props"
                 class="ms-1 menu-trigger"
-                :class="{ 'menu-visible': hoveredCategory === category.id }"
                 @click.stop
+                @mouseenter="handleChipMouseEnter(category.id)"
               />
             </template>
             
-            <v-list density="compact" class="py-1">
+            <v-list 
+              density="compact" 
+              class="py-1"
+              @mouseenter="handleChipMouseEnter(category.id)"
+              @mouseleave="handleMenuMouseLeave"
+            >
               <v-list-item 
                 @click="editCategory(category)" 
                 class="cursor-pointer"
@@ -61,6 +66,7 @@
               />
               
               <v-list-item 
+                v-if="!isDefaultCategory(category)"
                 @click="deleteCategory(category)" 
                 class="cursor-pointer text-red"
                 prepend-icon="mdi-delete"
@@ -101,16 +107,25 @@
       :category="categoryToEdit"
       @category-updated="onCategoryUpdated"
     />
+    
+    <!-- Modal para eliminar categoría -->
+    <DeleteCategoryModal
+      ref="deleteCategoryModalRef"
+      v-model="showDeleteCategoryModal"
+      :category="categoryToDelete"
+      @confirmed="onDeleteConfirmed"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { categoriesService, type Category } from '../services/productsService'
+import { categoriesService, productsService, type Category } from '../services/productsService'
 import { useAuthStore } from '../stores/auth'
 import { useCategoryIcon } from '../composables/categoryIcons'
 import AddCategoryModal from './AddCategoryModal.vue'
 import EditCategoryModal from './EditCategoryModal.vue'
+import DeleteCategoryModal from './DeleteCategoryModal.vue'
 
 // Props y emits
 const emit = defineEmits<{
@@ -129,8 +144,11 @@ const selectedCategory = ref<number | null>(null)
 const loading = ref(false)
 const showAddCategoryModal = ref(false)
 const showEditCategoryModal = ref(false)
+const showDeleteCategoryModal = ref(false)
 const categoryToEdit = ref<Category | null>(null)
+const categoryToDelete = ref<Category | null>(null)
 const hoveredCategory = ref<number | null>(null)
+const deleteCategoryModalRef = ref()
 
 // Métodos
 const loadCategories = async () => {
@@ -175,17 +193,90 @@ const onCategoryUpdated = (updatedCategory: Category) => {
   }
 }
 
+const onDeleteConfirmed = async (category: Category) => {
+  try {
+    // 1. Obtener o crear la categoría "Sin categoría"
+    const defaultCategory = await categoriesService.getOrCreateDefaultCategory(authStore.token || undefined)
+    
+    // 2. Reasignar todos los productos de la categoría a eliminar a la categoría "Sin categoría"
+    await productsService.reassignProductsToCategory(category.id, defaultCategory.id, authStore.token || undefined)
+    
+    // 3. Eliminar la categoría
+    await categoriesService.deleteCategory(category.id, authStore.token || undefined)
+    
+    // 4. Recargar completamente la lista de categorías desde el servidor
+    await loadCategories()
+    
+    // 5. Si la categoría eliminada estaba seleccionada, deseleccionar
+    if (selectedCategory.value === category.id) {
+      selectedCategory.value = null
+      emit('categoryChanged', null)
+    }
+    
+    // 6. Cerrar el modal y finalizar loading
+    if (deleteCategoryModalRef.value) {
+      deleteCategoryModalRef.value.finishLoading()
+    }
+    
+  } catch (error) {
+    console.error('Error al eliminar categoría:', error)
+    
+    // Finalizar loading incluso si hay error
+    if (deleteCategoryModalRef.value) {
+      deleteCategoryModalRef.value.finishLoading()
+    }
+    
+    // Aquí podrías mostrar una notificación de error
+  }
+}
+
 const editCategory = (category: Category) => {
   categoryToEdit.value = category
   showEditCategoryModal.value = true
 }
 
 const deleteCategory = (category: Category) => {
-  // TODO: Implementar eliminación de categoría
-  console.log('Eliminar categoría:', category.name)
+  categoryToDelete.value = category
+  showDeleteCategoryModal.value = true
 }
 
-// El menú ahora siempre está disponible, no necesitamos funciones de hover especiales
+// Función para verificar si una categoría es la categoría default
+const isDefaultCategory = (category: Category): boolean => {
+  return category.name === 'Sin categoría' || category.metadata?.isDefaultCategory === true
+}
+
+// Variable para timeout del hover
+let hoverTimeout: number | null = null
+
+// Función para limpiar el timeout previo
+const clearHoverTimeout = () => {
+  if (hoverTimeout) {
+    clearTimeout(hoverTimeout)
+    hoverTimeout = null
+  }
+}
+
+// Función para manejar cuando el mouse entra al chip
+const handleChipMouseEnter = (categoryId: number) => {
+  clearHoverTimeout()
+  hoveredCategory.value = categoryId
+}
+
+// Función para manejar cuando el mouse sale del chip
+const handleChipMouseLeave = () => {
+  clearHoverTimeout()
+  hoverTimeout = setTimeout(() => {
+    hoveredCategory.value = null
+  }, 200)
+}
+
+// Función para manejar cuando el mouse sale del menú
+const handleMenuMouseLeave = () => {
+  clearHoverTimeout()
+  hoverTimeout = setTimeout(() => {
+    hoveredCategory.value = null
+  }, 200)
+}
 
 // Lifecycle
 onMounted(() => {
