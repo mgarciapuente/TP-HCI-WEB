@@ -172,24 +172,76 @@ onMounted(() => {
   flex-direction: column;
   position: relative;
   overflow-y: auto;
+  padding: 0 16px;
 }
 
 .page-header {
   text-align: left;
+  margin-bottom: 16px;
 }
 
 .page-title {
-  font-size: 2.5rem;
+  font-size: 1.75rem;
   font-weight: 500;
   color: #333;
-  padding: 0.5em
+  padding: 8px 0;
+  margin: 0;
 }
 
 .search-section {
   width: 100%;
-  margin: 0 auto;
-  padding-left: 1em;
-  padding-right: 1em;
+  margin: 0 auto 16px auto;
+  padding: 0;
+}
+
+/* Responsive breakpoints */
+@media (min-width: 600px) {
+  .productos-page {
+    padding: 0 24px;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+    padding: 12px 0;
+  }
+  
+  .page-header {
+    margin-bottom: 20px;
+  }
+  
+  .search-section {
+    margin-bottom: 20px;
+  }
+}
+
+@media (min-width: 960px) {
+  .productos-page {
+    padding: 0 32px;
+  }
+  
+  .page-title {
+    font-size: 2.25rem;
+    padding: 16px 0;
+  }
+  
+  .page-header {
+    margin-bottom: 24px;
+  }
+  
+  .search-section {
+    margin-bottom: 24px;
+  }
+}
+
+@media (min-width: 1264px) {
+  .productos-page {
+    padding: 0 40px;
+  }
+  
+  .page-title {
+    font-size: 2.5rem;
+    padding: 20px 0;
+  }
 }
 
 .search-input {
@@ -202,8 +254,8 @@ onMounted(() => {
 
 .fab-inside-card {
   position: fixed;
-  bottom: 2rem;  
-  right: 2rem;    
+  bottom: 1rem;  
+  right: 1rem;    
   z-index: 1000; 
 }
 

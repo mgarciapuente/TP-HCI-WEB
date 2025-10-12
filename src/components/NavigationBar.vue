@@ -168,6 +168,7 @@ const handleLogout = async () => {
   transition: all 0.2s ease;
   padding: 8px;
   border-radius: 8px;
+  min-width: 0;
 }
 
 .navbar-title-container:hover {
@@ -176,11 +177,13 @@ const handleLogout = async () => {
 
 .navbar-logo {
   vertical-align: middle;
-  margin-left: 16px;
-  margin-right: 12px;
+  margin-left: 12px;
+  margin-right: 8px;
+  flex-shrink: 0;
 }
+
 .navbar-title-text {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: bold;
   color: #fff;
 }
@@ -192,10 +195,30 @@ const handleLogout = async () => {
 }
 
 /* Estados hover, focus, active para los botones */
+.nav-button {
+  font-size: 0.875rem;
+  padding: 8px 16px;
+}
+
 .nav-button:hover {
   background-color: rgba(255, 255, 255, 0.1) !important;
   outline: none !important;
   border: none !important;
+}
+
+/* Responsive para botones de navegación */
+@media (max-width: 768px) {
+  .nav-button {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-button {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
 }
 
 .nav-button:focus {
@@ -265,11 +288,11 @@ const handleLogout = async () => {
 .profile-dropdown {
   position: fixed;
   top: 60px;
-  right: 24px;
+  right: 16px;
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  min-width: 200px;
+  min-width: 180px;
   z-index: 10000;
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.1);

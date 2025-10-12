@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" max-width="500" persistent>
+  <v-dialog v-model="dialog" max-width="500" persistent :fullscreen="$vuetify.display.xs">
     <v-card>
       <v-card-title class="d-flex align-center pa-4">
         <v-icon start color="secondary">mdi-package-variant-plus</v-icon>

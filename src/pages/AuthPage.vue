@@ -173,8 +173,22 @@ const handlePasswordReset = () => {
 }
 </script>
 <style scoped>
+/* Container responsive */
+.auth-container {
+  min-height: 100%;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Card responsive */
 .auth-card {
+  width: 100%;
+  max-width: 550px;
+  padding: 2.5em;
+  border-radius: 16px;
+  background-color: rgba(255,255,255,0.95);
   box-shadow: 0 8px 32px rgba(70, 93, 70, 0.15) !important;
+  margin: auto;
 }
 
 /* Personalizar los campos de texto */
@@ -194,9 +208,8 @@ const handlePasswordReset = () => {
 </style>
 
 <template>
-  <div class="d-flex justify-center align-center" style="min-height: 100%; padding: 20px;">
+  <div class="d-flex justify-center align-center auth-container">
     <v-card class="auth-card"
-      style="width: 100%; max-width: 450px; padding: 40px; border-radius: 16px; background-color: rgba(255,255,255,0.95);"
       elevation="8">
       <!-- Header con logo y título -->
       <div class="text-center mb-6">

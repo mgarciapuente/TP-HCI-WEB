@@ -64,7 +64,7 @@ const handleCancel = () => {
 </style>
 
 <template>
-    <v-dialog v-model="isVisible" max-width="600" persistent>
+    <v-dialog v-model="isVisible" max-width="600" persistent :fullscreen="$vuetify.display.xs">
         <v-card>
             <v-card-title class="d-flex align-center pa-4">
                 <v-icon start>mdi-playlist-plus</v-icon>

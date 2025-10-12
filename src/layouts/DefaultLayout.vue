@@ -32,7 +32,7 @@ import NavigationBar from '../components/NavigationBar.vue'
 }
 
 .main-container {
-  padding: 1.5em;
+  padding: 12px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -40,15 +40,14 @@ import NavigationBar from '../components/NavigationBar.vue'
 }
 
 .main-card { 
-  height: calc(100vh - 96px);
+  height: calc(100vh - 88px);
   width: 100%;
   box-sizing: border-box;
   position: relative;
   background-color: rgb(var(--v-theme-surface));
-  border-radius: 16px;
+  border-radius: 12px;
   overflow-y: auto;
   overflow-x: hidden;
-
   display: flex;
   flex-direction: column;
 }
