@@ -31,7 +31,7 @@ const isVisible = computed({
 })
 
 // Composables
-const { getAllAvailableListIcons, getSuggestedIcons } = useListIcon()
+const { getAllAvailableListIcons } = useListIcon()
 
 const formRef = ref()
 const formularioValido = ref(false)
@@ -52,11 +52,7 @@ const availableIconsForSelection = computed(() => {
   }))
 })
 
-// Computed para sugerencias de iconos basadas en el nombre
-const suggestedIcons = computed(() => {
-  if (!form.nombre.trim()) return []
-  return getSuggestedIcons(form.nombre)
-})
+
 
 // Reglas de validación para el icono
 const iconRules = [
@@ -141,29 +137,6 @@ const handleCancel = () => {
                                         </v-list-item>
                                     </template>
                                 </v-select>
-                            </v-col>
-
-                            <v-col cols="12" v-if="suggestedIcons.length > 0">
-                                <v-card variant="outlined" class="pa-3">
-                                    <v-card-subtitle class="pa-0 mb-2">
-                                        <v-icon size="16" class="me-1">mdi-lightbulb-outline</v-icon>
-                                        Sugerencias basadas en el nombre
-                                    </v-card-subtitle>
-                                    <div class="d-flex gap-2">
-                                        <v-chip
-                                            v-for="suggestion in suggestedIcons"
-                                            :key="suggestion.icon"
-                                            @click="form.selectedIcon = suggestion.icon"
-                                            :color="form.selectedIcon === suggestion.icon ? 'primary' : 'default'"
-                                            variant="outlined"
-                                            size="small"
-                                            class="cursor-pointer"
-                                        >
-                                            <v-icon start :icon="suggestion.icon" size="16" />
-                                            {{ suggestion.name }}
-                                        </v-chip>
-                                    </div>
-                                </v-card>
                             </v-col>
 
                             <v-col cols="12">

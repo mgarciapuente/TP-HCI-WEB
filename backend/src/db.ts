@@ -4,7 +4,7 @@ import path from "path";
 export default new DataSource({
   type: "sqlite",
   database: path.join(__dirname, "db/init.sqlite"),
-  synchronize: true, // Cambiado a true para crear tablas automáticamente
+  synchronize: false,
   logging: false,
 //   logging: ["error"] // Solo errores
 // logging: ["query", "error"] // Queries y errores

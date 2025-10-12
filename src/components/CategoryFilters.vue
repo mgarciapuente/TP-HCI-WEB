@@ -18,7 +18,7 @@
         :variant="selectedCategory === category.id ? 'elevated' : 'outlined'"
         class="category-chip"
         @mouseenter="isFullMode ? handleChipMouseEnter(category.id) : undefined"
-        @mouseleave="isFullMode ? handleChipMouseLeave : undefined"
+        @mouseleave="isFullMode ? handleChipMouseLeave(category.id) : undefined"
       >
         <template v-slot:prepend>
           <v-icon 
@@ -49,14 +49,14 @@
                 v-bind="props"
                 class="ms-1 menu-trigger"
                 @click.stop
-                @mouseenter="handleChipMouseEnter(category.id)"
+                @mouseenter="clearHoverTimeout"
               />
             </template>
             
             <v-list 
               density="compact" 
               class="py-1"
-              @mouseenter="handleChipMouseEnter(category.id)"
+              @mouseenter="clearHoverTimeout"
               @mouseleave="handleMenuMouseLeave"
             >
               <v-list-item 
@@ -275,19 +275,19 @@ const handleChipMouseEnter = (categoryId: number) => {
 }
 
 // Función para manejar cuando el mouse sale del chip
-const handleChipMouseLeave = () => {
+const handleChipMouseLeave = (categoryId: number) => {
   clearHoverTimeout()
   hoverTimeout = setTimeout(() => {
-    hoveredCategory.value = null
-  }, 200)
+    if (hoveredCategory.value === categoryId) {
+      hoveredCategory.value = null
+    }
+  }, 300)
 }
 
 // Función para manejar cuando el mouse sale del menú
 const handleMenuMouseLeave = () => {
   clearHoverTimeout()
-  hoverTimeout = setTimeout(() => {
-    hoveredCategory.value = null
-  }, 200)
+  hoveredCategory.value = null
 }
 
 // Lifecycle

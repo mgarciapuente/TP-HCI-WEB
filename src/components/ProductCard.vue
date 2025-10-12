@@ -2,7 +2,6 @@
   <v-card
     class="product-card"
     elevation="2"
-    hover
   >
     <v-card-text class="d-flex align-center pa-4">
       <v-icon
@@ -85,14 +84,8 @@ const deleteProduct = () => {
 
 <style scoped>
 .product-card {
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   border-radius: 12px;
   background-color: white;
-}
-
-.product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .product-name {

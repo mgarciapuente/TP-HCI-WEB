@@ -1,5 +1,32 @@
 // Configuración de la API basada en la documentación Swagger
 
+// Helper para mapear respuestas de la API que pueden venir en diferentes formatos
+export const mapApiResponse = (data: any, expectedKey: string = 'data') => {
+  // Si es un array directo, lo devolvemos tal como está
+  if (Array.isArray(data)) {
+    return {
+      [expectedKey]: data,
+      totalCount: data.length,
+      totalPages: 1,
+      currentPage: 1
+    }
+  }
+  
+  // Si tiene la estructura {data: [...], pagination: {...}}
+  if (data.data && Array.isArray(data.data)) {
+    return {
+      [expectedKey]: data.data,
+      totalCount: data.pagination?.totalCount || data.data.length,
+      totalPages: data.pagination?.totalPages || 1,
+      currentPage: data.pagination?.currentPage || 1,
+      ...data.pagination // Incluir toda la información de paginación
+    }
+  }
+  
+  // Si ya tiene la estructura esperada o es un objeto individual, lo devolvemos tal como está
+  return data
+}
+
 export const API_CONFIG = {
   // URL base del servidor (según la documentación Swagger)
   BASE_URL: 'http://localhost:8080',

@@ -1,4 +1,4 @@
-import { createApiUrl, createAuthHeaders } from './apiConfig'
+import { createApiUrl, createAuthHeaders, mapApiResponse } from './apiConfig'
 import type { ApiError } from '../types'
 
 class ApiException extends Error {
@@ -10,7 +10,7 @@ class ApiException extends Error {
   }
 }
 
-const handleApiResponse = async <T>(response: Response): Promise<T> => {
+const handleApiResponse = async <T>(response: Response, mapKey?: string): Promise<T> => {
   if (!response.ok) {
     try {
       const err = await response.json() as ApiError
@@ -24,7 +24,14 @@ const handleApiResponse = async <T>(response: Response): Promise<T> => {
     // @ts-ignore
     return undefined
   }
-  return await response.json()
+  const data = await response.json()
+  
+  // Si se especifica una clave de mapeo, usamos el helper
+  if (mapKey) {
+    return mapApiResponse(data, mapKey) as T
+  }
+  
+  return data
 }
 
 // NOTE: Backend endpoints for purchases/history may vary. Assumptions:
@@ -39,7 +46,7 @@ export const purchasesService = {
       headers: createAuthHeaders(token)
     })
 
-    return handleApiResponse<any>(response)
+    return handleApiResponse<any>(response, 'purchases')
   },
 
   async restorePurchase(token: string, purchaseId: number) {

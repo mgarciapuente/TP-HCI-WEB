@@ -10,7 +10,7 @@ import type {
   SharedUser,
   PagedListsResponse
 } from '../types/listTypes'
-import { API_CONFIG, createAuthHeaders, createApiUrl } from './apiConfig'
+import { API_CONFIG, createAuthHeaders, createApiUrl, mapApiResponse } from './apiConfig'
 
 // Reusar la clase ApiException y el helper handleApiResponse del estilo de userService
 export class ApiException extends Error {
@@ -23,7 +23,7 @@ export class ApiException extends Error {
   }
 }
 
-const handleApiResponse = async <T>(response: Response): Promise<T> => {
+const handleApiResponse = async <T>(response: Response, mapKey?: string): Promise<T> => {
   if (!response.ok) {
     let errorMessage = 'Error en la solicitud'
 
@@ -44,7 +44,14 @@ const handleApiResponse = async <T>(response: Response): Promise<T> => {
     return undefined
   }
 
-  return await response.json()
+  const data = await response.json()
+  
+  // Si se especifica una clave de mapeo, usamos el helper
+  if (mapKey) {
+    return mapApiResponse(data, mapKey) as T
+  }
+  
+  return data
 }
 
 export const listService = {
@@ -97,7 +104,7 @@ export const listService = {
       }
     )
 
-    return handleApiResponse<PagedListsResponse | ShoppingList[]>(response)
+    return handleApiResponse<PagedListsResponse | ShoppingList[]>(response, 'lists')
   },
 
   // Obtener una lista por id
@@ -231,7 +238,7 @@ export const listService = {
       }
     )
 
-    return handleApiResponse<ListItem[]>(response)
+    return handleApiResponse<ListItem[]>(response, 'items')
   },
 
   // Toggle purchased status for an item

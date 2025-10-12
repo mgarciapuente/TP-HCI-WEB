@@ -5,10 +5,12 @@ import { useAuthStore } from '@/stores/auth'
 import { listService } from '@/services/listService'
 import { purchasesService } from '@/services/purchasesService'
 import CantidadModal from './CantidadModal.vue'
+import ShareListModal from './ShareListModal.vue'
 import type { ListItem } from '@/types/listTypes'
 
 const editItemModal = ref(false)
 const itemToEdit = ref<ListItem | null>(null)
+const shareModal = ref(false)
 
 const openEditItemModal = (item: ListItem) => {
     itemToEdit.value = item
@@ -28,6 +30,15 @@ const handleItemEdit = async (payload: { quantity: number, unit: string }) => {
     } finally {
         saveLoading.value = false
     }
+}
+
+const openShareModal = () => {
+    shareModal.value = true
+}
+
+const handleListShared = (email: string) => {
+    console.log(`Lista compartida con: ${email}`)
+    // Aquí podrías agregar lógica adicional como mostrar un snackbar de éxito
 }
 
 interface Props {
@@ -205,8 +216,20 @@ defineExpose({ refresh: fetchItems })
 .header-top {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
     margin-bottom: 0.5rem;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
 }
 
 .products-scroll {
@@ -255,28 +278,51 @@ defineExpose({ refresh: fetchItems })
         @update:modelValue="editItemModal = $event"
         @save="handleItemEdit"
     />
+    
+    <ShareListModal
+        v-model="shareModal"
+        :list-id="props.selectedList?.id || null"
+        :list-name="props.selectedList?.name || ''"
+        @shared="handleListShared"
+    />
     <div class="products-panel">
         <div class="products-header">
             <div class="header-top">
-                <v-btn v-if="props.addProductMode" icon @click="emit('exit-add-mode')">
-                    <v-icon>mdi-arrow-left</v-icon>
-                </v-btn>
-                <h2 class="panel-title" style="display: flex; align-items: center; gap: 8px;">
-                    <template v-if="editMode">
-                        <v-text-field v-model="editedName" density="compact" variant="outlined" hide-details
-                            style="max-width: 300px;" />
-                        <v-btn color="primary" size="small" @click="saveEdit" :loading="saveLoading"
-                            style="margin-left: 8px;">Guardar</v-btn>
-                        <v-btn size="small" variant="text" @click="cancelEdit">Cancelar</v-btn>
-                    </template>
-                    <template v-else>
-                        <span>{{ props.historyMode ? props.selectedPurchase.name : props.selectedList?.name }}</span>
-                        <v-btn v-if="!props.historyMode && !editMode && props.selectedList" icon size="small"
-                            variant="text" @click="startEdit" aria-label="Editar lista">
-                            <v-icon>mdi-pencil</v-icon>
-                        </v-btn>
-                    </template>
-                </h2>
+                <div class="header-left">
+                    <v-btn v-if="props.addProductMode" icon @click="emit('exit-add-mode')">
+                        <v-icon>mdi-arrow-left</v-icon>
+                    </v-btn>
+                    <h2 class="panel-title" style="display: flex; align-items: center; gap: 8px;">
+                        <template v-if="editMode">
+                            <v-text-field v-model="editedName" density="compact" variant="outlined" hide-details
+                                style="max-width: 300px;" />
+                            <v-btn color="primary" size="small" @click="saveEdit" :loading="saveLoading"
+                                style="margin-left: 8px;">Guardar</v-btn>
+                            <v-btn size="small" variant="text" @click="cancelEdit">Cancelar</v-btn>
+                        </template>
+                        <template v-else>
+                            <span>{{ props.historyMode ? props.selectedPurchase.name : props.selectedList?.name }}</span>
+                            <v-btn v-if="!props.historyMode && !editMode && props.selectedList" icon size="small"
+                                variant="text" @click="startEdit" aria-label="Editar lista">
+                                <v-icon>mdi-pencil</v-icon>
+                            </v-btn>
+                        </template>
+                    </h2>
+                </div>
+                
+                <!-- Botón de compartir en la esquina superior derecha -->
+                <div class="header-right">
+                    <v-btn 
+                        v-if="!props.historyMode && props.selectedList"
+                        icon 
+                        variant="text" 
+                        color="primary"
+                        @click="openShareModal"
+                        aria-label="Compartir lista"
+                    >
+                        <v-icon>mdi-share-variant</v-icon>
+                    </v-btn>
+                </div>
             </div>
             <CategoryFilters v-if="!props.historyMode" mode="filter-only" @categoryChanged="onCategoryChanged" />
         </div>

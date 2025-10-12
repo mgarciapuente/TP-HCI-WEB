@@ -52,9 +52,11 @@ const getLists = async () => {
             // Obtener las listas normalmente
             res = await listService.getLists(auth.token, params);
         }
-        // If paginated, map to array
+        // Manejar la respuesta que puede ser array directo o objeto con estructura
         if (Array.isArray(res)) {
             lists.value = res as any
+        } else if (res && res.lists && Array.isArray(res.lists)) {
+            lists.value = res.lists as any
         } else {
             lists.value = []
         }

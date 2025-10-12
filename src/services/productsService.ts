@@ -1,4 +1,4 @@
-import { API_CONFIG, createApiUrl, createAuthHeaders } from './apiConfig'
+import { API_CONFIG, createApiUrl, createAuthHeaders, mapApiResponse } from './apiConfig'
 
 export interface Category {
   id: number
@@ -66,24 +66,13 @@ export const productsService = {
     })
     
     if (!response.ok) {
-      throw new Error('Error al obtener productos')
+      throw new Error(`Error al obtener productos: ${response.status}`)
     }
     
     const data = await response.json()
     
-    // Verificar si la respuesta es un array directo o un objeto con estructura
-    if (Array.isArray(data)) {
-      // La API devuelve un array directo
-      return {
-        products: data,
-        totalCount: data.length,
-        totalPages: 1,
-        currentPage: 1
-      } as ProductsResponse
-    } else {
-      // La API devuelve un objeto con estructura
-      return data as ProductsResponse
-    }
+    // Mapear la respuesta usando el helper universal
+    return mapApiResponse(data, 'products') as ProductsResponse
   },
 
   // Crear nuevo producto
@@ -204,19 +193,8 @@ export const categoriesService = {
     
     const data = await response.json()
     
-    // Verificar si la respuesta es un array directo o un objeto con estructura
-    if (Array.isArray(data)) {
-      // La API devuelve un array directo
-      return {
-        categories: data,
-        totalCount: data.length,
-        totalPages: 1,
-        currentPage: 1
-      }
-    } else {
-      // La API devuelve un objeto con estructura
-      return data
-    }
+    // Mapear la respuesta usando el helper universal
+    return mapApiResponse(data, 'categories')
   },
 
   // Crear nueva categoría
