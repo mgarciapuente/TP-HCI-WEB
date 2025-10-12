@@ -3,7 +3,6 @@ import { reactive, ref, computed } from 'vue'
 
 interface CreateList {
     nombre: string
-    recurrente: boolean
     descripcion?: string
 }
 
@@ -33,13 +32,11 @@ const formularioValido = ref(false)
 
 const form = reactive<CreateList>({
     nombre: '',
-    recurrente: false,
     descripcion: ''
 })
 
 const resetForm = () => {
     form.nombre = ''
-    form.recurrente = false
     form.descripcion = ''
 }
 
@@ -82,9 +79,7 @@ const handleCancel = () => {
                                     hide-details="auto" />
                             </v-col>
 
-                            <v-col cols="12">
-                                <v-checkbox v-model="form.recurrente" label="Lista recurrente" density="comfortable" />
-                            </v-col>
+                            
 
                             <v-col cols="12">
                                 <v-text-field v-model="form.descripcion" label="Descripción (opcional)"

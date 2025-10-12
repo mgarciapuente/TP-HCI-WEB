@@ -134,12 +134,24 @@ const confirmAdd = async () => {
     border-width: 3px;
     border-style: solid;
     border-color: transparent;
+    background-color: rgba(var(--v-theme-on-surface), 0.06) !important;
+    transition: background-color 0.15s ease;
+    /* Add unified inner padding for consistent spacing; match ListaProductos */
+    padding: 1em 2em;
 }
 
 .product-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+/* No hover background change to avoid clickable affordance */
+/* (intentionally left without a :hover override) */
+
+/* Remove default padding from v-card-text; we apply it at the card level */
+.product-item :deep(.v-card-text) {
+    padding: 0 !important;
 }
 
 .no-products {
@@ -176,7 +188,7 @@ const confirmAdd = async () => {
             <SearchBar v-model="searchQuery" placeholder="Buscar producto..." :debounce-ms="500" />
         </div>
         <div class="products-scroll">
-            <div v-if="loading" class="loading">Cargando...</div>
+            <div v-if="loading" class="loading"><v-progress-circular color="secondary" indeterminate size="36" /></div>
 
             <div v-else-if="items.length === 0" class="no-products">
                 <v-icon size="48" color="grey">mdi-cube-outline</v-icon>
@@ -193,7 +205,7 @@ const confirmAdd = async () => {
                             <p class="product-details">{{ product.description || product.metadata?.notes || '' }}</p>
                         </div>
                         <v-spacer />
-                        <v-icon size="x-large" @click="openAddForProduct(product)" color="secondary">mdi-plus</v-icon>
+                        <v-icon size="x-large" @click="openAddForProduct(product)" color="secondary">mdi-basket-plus</v-icon>
                     </v-card-text>
                 </v-card>
             </div>

@@ -42,6 +42,7 @@ const emit = defineEmits<{
     (e: 'list-completed', listId: number): void
     (e: 'exit-add-mode'): void
     (e: 'enter-add-mode'): void
+    (e: 'list-renamed', payload: { id: number, name: string }): void
 }>()
 
 const auth = useAuthStore()
@@ -96,6 +97,16 @@ const fetchItems = async () => {
     }
 }
 
+// Refetch items when the selected list changes (including switching between lists)
+watch(() => props.selectedList?.id, (newId, oldId) => {
+    if (newId !== oldId) {
+        editMode.value = false
+        itemsToDelete.value = []
+        editedName.value = props.selectedList?.name || ''
+        fetchItems()
+    }
+}, { immediate: true })
+
 watch(() => props.selectedPurchase?.id, () => {
     fetchItems()
 }, { immediate: true })
@@ -130,15 +141,17 @@ const startEdit = () => {
     itemsToDelete.value = []
 }
 
-const markForDelete = (itemId: number) => {
-    if (!itemsToDelete.value.includes(itemId)) {
+const toggleMarkForDelete = (itemId: number) => {
+    const idx = itemsToDelete.value.indexOf(itemId)
+    if (idx >= 0) {
+        // unmark (restore)
+        itemsToDelete.value.splice(idx, 1)
+    } else {
+        // mark for delete
         itemsToDelete.value.push(itemId)
     }
 }
 
-const unmarkForDelete = (itemId: number) => {
-    itemsToDelete.value = itemsToDelete.value.filter(id => id !== itemId)
-}
 
 const saveEdit = async () => {
     if (!auth.token || !props.selectedList) return
@@ -147,6 +160,8 @@ const saveEdit = async () => {
         // Actualizar nombre si cambió
         if (editedName.value !== props.selectedList.name) {
             await listService.updateList(auth.token ?? '', props.selectedList.id, { name: editedName.value })
+            // Notificar al padre para actualizar el título inmediatamente
+            emit('list-renamed', { id: props.selectedList.id, name: editedName.value })
         }
         // Eliminar productos marcados
         for (const itemId of itemsToDelete.value) {
@@ -191,6 +206,8 @@ defineExpose({ refresh: fetchItems })
     flex-direction: column;
     border-right: 1px solid #e0e0e0;
     position: relative;
+    height: 100%;
+    min-height: 100%;
     padding: 0.5em 2.5em 0.25em 2.5em;
 }
 
@@ -209,15 +226,80 @@ defineExpose({ refresh: fetchItems })
     margin-bottom: 0.5rem;
 }
 
+.panel-title {
+    width: 100%;
+    display: block;
+    margin: 0;
+}
+
+.title-edit-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.title-input {
+    flex: 1;
+    min-width: 420px;
+    max-width: 100%;
+}
+
+.title-actions {
+    display: flex;
+    justify-content: flex-end; /* keep buttons together on the right */
+    gap: 12px;
+    margin-left: auto; /* add big space between input and buttons */
+}
+
 .products-scroll {
     flex: 1;
     overflow-y: auto;
-    padding: 0.5em;
+    padding: 1em;
 }
 
 .product-item {
     display: flex;
     flex-direction: row;
+    background-color: rgba(var(--v-theme-on-surface), 0.06) !important;
+    border-radius: 12px;
+    transition: background-color 0.15s ease;
+    padding: 1em 2em; /* slightly more lateral spacing */
+}
+
+.item-deleted {
+    opacity: 0.6;
+}
+
+/* Purchased state: use primary theme color */
+.item-purchased {
+    background-color: rgb(var(--v-theme-primary)) !important;
+}
+.item-purchased,
+.item-purchased :deep(.v-card-text),
+.item-purchased .product-info,
+.item-purchased .product-details,
+.item-purchased .product-name {
+    color: rgb(var(--v-theme-on-primary)) !important;
+}
+.item-purchased .product-name {
+    text-decoration: line-through;
+}
+
+/* Disable hover lighten to avoid click affordance */
+    /* No hover background change to avoid clickable affordance */
+    /* (intentionally left without a :hover override) */
+
+/* Remove default padding from v-card-text; we apply it at the card level */
+.product-item :deep(.v-card-text) {
+    padding: 0 !important;
+}
+
+.product-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 }
 
 .no-products {
@@ -240,8 +322,28 @@ defineExpose({ refresh: fetchItems })
 
 .fab-button-right {
     position: absolute;
-    bottom: 1.5em;
-    right: 1.5em;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 3;
+}
+
+.product-checkbox {
+    margin-right: 0;
+}
+
+/* Actions container for edit/delete with spacing */
+.item-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 8px;
+}
+
+/* Edit button contrast background (white/light) */
+.edit-btn-contrast {
+    background-color: #ffffff !important;
+    color: rgb(var(--v-theme-on-surface)) !important;
+    border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
 }
 </style>
 
@@ -261,13 +363,21 @@ defineExpose({ refresh: fetchItems })
                 <v-btn v-if="props.addProductMode" icon @click="emit('exit-add-mode')">
                     <v-icon>mdi-arrow-left</v-icon>
                 </v-btn>
-                <h2 class="panel-title" style="display: flex; align-items: center; gap: 8px;">
+                <h2 class="panel-title">
                     <template v-if="editMode">
-                        <v-text-field v-model="editedName" density="compact" variant="outlined" hide-details
-                            style="max-width: 300px;" />
-                        <v-btn color="primary" size="small" @click="saveEdit" :loading="saveLoading"
-                            style="margin-left: 8px;">Guardar</v-btn>
-                        <v-btn size="small" variant="text" @click="cancelEdit">Cancelar</v-btn>
+                        <div class="title-edit-row">
+                            <v-text-field
+                              class="title-input"
+                              v-model="editedName"
+                              density="compact"
+                              variant="outlined"
+                              hide-details
+                            />
+                            <div class="title-actions">
+                                <v-btn color="primary" size="small" @click="saveEdit" :loading="saveLoading">Guardar</v-btn>
+                                <v-btn size="small" variant="text" @click="cancelEdit">Cancelar</v-btn>
+                            </div>
+                        </div>
                     </template>
                     <template v-else>
                         <span>{{ props.historyMode ? props.selectedPurchase.name : props.selectedList?.name }}</span>
@@ -278,10 +388,10 @@ defineExpose({ refresh: fetchItems })
                     </template>
                 </h2>
             </div>
-            <CategoryFilters v-if="!props.historyMode" @categoryChanged="onCategoryChanged" />
+            <CategoryFilters v-if="!props.historyMode" @category-changed="onCategoryChanged" />
         </div>
         <div class="products-scroll">
-            <div v-if="loading" class="loading">Cargando...</div>
+            <div v-if="loading" class="loading"><v-progress-circular color="secondary" indeterminate size="36" /></div>
 
             <div v-else-if="items.length === 0" class="no-products">
                 <v-icon size="48" color="grey">mdi-cart-outline</v-icon>
@@ -290,29 +400,59 @@ defineExpose({ refresh: fetchItems })
             </div>
 
             <div v-else class="products-list">
-                <v-card v-for="product in items" :key="product.id" class="product-item mb-2" variant="flat"
-                    color="backgroundColor">
+                                <v-card
+                                    v-for="product in items"
+                                    :key="product.id"
+                                    class="product-item mb-2"
+                                    variant="flat"
+                                    color="backgroundColor"
+                                    :class="{ 'item-deleted': itemsToDelete.includes(product.id), 'item-purchased': (!props.historyMode && product.purchased) }"
+                                >
                     <v-card-text class="product-content">
                         <div class="product-info">
                             <h4 class="product-name">{{ product.product?.name }}</h4>
                             <p class="product-details">{{ product.quantity }} {{ product.unit }}</p>
                         </div>
                     </v-card-text>
-                    <v-btn v-if="editMode" icon size="small" color="error" @click="markForDelete(product.id)"
-                        aria-label="Eliminar producto">
-                        <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                    <v-btn v-if="editMode" icon size="small" color="primary" @click="openEditItemModal(product)"
-                        aria-label="Editar cantidad">
-                        <v-icon>mdi-pencil</v-icon>
-                    </v-btn>
-                    <v-checkbox v-else-if="!props.historyMode" :model-value="product.purchased" density="compact"
-                        hide-details @click="togglePurchased(product)" />
+                        <div v-if="editMode" class="item-actions">
+                            <!-- Edit button; hide when item is marked for deletion; add light background for contrast -->
+                            <v-btn
+                                v-if="!itemsToDelete.includes(product.id)"
+                                icon
+                                size="small"
+                                color="primary"
+                                class="edit-btn-contrast"
+                                @click="openEditItemModal(product)"
+                                aria-label="Editar cantidad"
+                            >
+                                <v-icon>mdi-pencil</v-icon>
+                            </v-btn>
+                            <!-- Delete/Restore toggle button; hide for purchased unless already marked (to allow restore) -->
+                            <v-btn
+                                v-if="(!product.purchased) || itemsToDelete.includes(product.id)"
+                                icon
+                                size="small"
+                                :color="itemsToDelete.includes(product.id) ? 'warning' : 'error'"
+                                @click="toggleMarkForDelete(product.id)"
+                                :aria-label="itemsToDelete.includes(product.id) ? 'Restaurar producto' : 'Eliminar producto'"
+                            >
+                                <v-icon>{{ itemsToDelete.includes(product.id) ? 'mdi-backup-restore' : 'mdi-close' }}</v-icon>
+                            </v-btn>
+                        </div>
+                    <v-checkbox
+                        v-else-if="!props.historyMode"
+                        :model-value="product.purchased"
+                        density="compact"
+                        class="product-checkbox"
+                        hide-details
+                        :color="product.purchased ? 'white' : 'primary'"
+                        @click="togglePurchased(product)"
+                    />
                 </v-card>
             </div>
         </div>
         <v-btn v-if="!props.historyMode" color="secondary" class="fab-button-right" size="large"
-            icon="mdi-playlist-plus" fab @click="emit('enter-add-mode')">
+            icon="mdi-basket-plus" fab :disabled="editMode" @click="emit('enter-add-mode')">
         </v-btn>
 
         <v-snackbar v-model="errorSnackbar.show" color="error" timeout="4000">
