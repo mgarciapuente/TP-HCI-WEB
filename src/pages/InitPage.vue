@@ -94,13 +94,6 @@
   <!-- Footer -->
   <div style="color: white; padding: 40px 20px;" class="bg-primary">
     <div style="width:100%; max-width:800px; margin: 0 auto; text-align:center;">
-      <!-- Enlaces del footer -->
-      <div class="d-flex justify-center" style="gap: 32px; margin-bottom: 24px; flex-wrap: wrap;">
-        <a href="#" style="color: white; text-decoration: none;">Sobre Canasta</a>
-        <a href="#" style="color: white; text-decoration: none;">Contacto</a>
-        <a href="#" style="color: white; text-decoration: none;">Privacidad</a>
-      </div>
-      
       <!-- Texto del footer -->
       <p style="margin: 0; font-size: 14px; opacity: 0.9;">
         Hecha por estudiantes del ITBA

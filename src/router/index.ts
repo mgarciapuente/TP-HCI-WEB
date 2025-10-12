@@ -16,9 +16,9 @@ const routes = [
     component: () => import('../pages/InitPage.vue'),
     beforeEnter: (_to: any, _from: any, next: any) => {
       const authStore = useAuthStore()
-      // Si el usuario está logueado, redirigir al perfil en lugar de mostrar inicio
+      // Si el usuario está logueado, redirigir a listas en lugar de mostrar inicio
       if (authStore.isLoggedIn) {
-        next('/perfil')
+        next('/listas')
       } else {
         next()
       }

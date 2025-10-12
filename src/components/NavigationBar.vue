@@ -3,7 +3,7 @@
     color="primary" 
     elevation="2"
   >
-    <div class="navbar-title-container">
+    <div class="navbar-title-container" @click="goToHome">
       <img src="@/assets/logo.png" alt="Logo" class="navbar-logo" height="32" />
       <v-app-bar-title class="text-buttons font-weight-medium navbar-title-text">
         Canasta
@@ -15,13 +15,13 @@
     <!-- Navegación del header -->
     <v-btn 
       v-if="!authStore.isLoggedIn"
-      variant="text" 
+      variant="outlined" 
       color="buttons"
       class="text-none normal-case nav-button"
-      :class="{ 'active-nav': isActive('/inicio') }"
-      @click="$router.push('/inicio')"
+      style="border-color: rgba(255, 255, 255, 0.8); color: white;"
+      @click="$router.push('/auth/login')"
     >
-      Inicio
+      Iniciar sesión
     </v-btn>
 
     <v-btn
@@ -125,6 +125,10 @@ const cancelHideDropdown = () => {
 }
 
 // Funciones de navegación
+const goToHome = () => {
+  router.push('/inicio')
+}
+
 const navigateToProfile = () => {
   showDropdown.value = false
   router.push('/perfil')
@@ -160,7 +164,16 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 8px;
+  border-radius: 8px;
 }
+
+.navbar-title-container:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 .navbar-logo {
   vertical-align: middle;
   margin-left: 16px;
