@@ -148,9 +148,7 @@ export const userService = {
       }
     )
 
-    if (!response.ok) {
-      throw new ApiException(response.status, 'Error al verificar la cuenta')
-    }
+    return handleVoidResponse(response)
   },
 
   // Enviar código de verificación
@@ -163,11 +161,7 @@ export const userService = {
       }
     )
 
-    if (!response.ok) {
-      throw new ApiException(response.status, 'Error al enviar código de verificación')
-    }
-
-    return response.json();
+    return handleApiResponse<VerificationCode>(response)
   },
 
   // Solicitar recuperación de contraseña
@@ -227,13 +221,13 @@ export const userService = {
     }
   },
 
-  // Registrar nuevo usuario (sin inicialización, se hace en el login)
+  // Registrar nuevo usuario y redirigir a verificación
   async registerWithInitialization(userData: RegistrationData): Promise<NewUser> {
-    console.log('🔴 REGISTRANDO USUARIO (inicialización en login)', userData.email)
+    console.log('🔴 REGISTRANDO USUARIO (requiere verificación)', userData.email)
     try {
-      // Solo registrar el usuario, la inicialización se hace en el primer login
+      // Registrar el usuario - ahora requiere verificación
       const newUser = await this.register(userData)
-      console.log('🔴 Usuario registrado exitosamente. Datos se inicializarán en primer login.')
+      console.log('🔴 Usuario registrado. Verificación requerida.')
       
       return newUser
       

@@ -124,7 +124,6 @@ const handleLogin = async () => {
 }
 
 const handleRegister = async () => {
-  // 🔧 CÓDIGO REAL para cuando el backend esté disponible
   const registrationData: RegistrationData = {
     name: formData.value.name,
     surname: formData.value.surname,
@@ -136,24 +135,26 @@ const handleRegister = async () => {
   }
 
   try {
-    // Llamar al servicio de registro CON inicialización automática
-    await userService.registerWithInitialization(registrationData)
+    // Registrar el usuario (sin bypass de verificación)
+    await userService.register(registrationData)
+    
+    // Enviar código de verificación
+    await userService.sendVerificationCode(registrationData.email)
 
     // Mostrar mensaje de éxito
-    successMessage.value = 'Cuenta creada exitosamente. ¡Ya puedes comenzar a usar Canasta!'
+    successMessage.value = 'Cuenta creada exitosamente. Revisa tu email para el código de verificación.'
+    
+    // Redirigir a la página de verificación con el email y password
+    setTimeout(() => {
+      router.push({
+        path: '/auth/verify',
+        query: {
+          email: registrationData.email,
+          password: registrationData.password // Para el auto-login después de verificar
+        }
+      })
+    }, 2000)
 
-    const code = await userService.sendVerificationCode(registrationData.email);
-
-    await userService.verifyAccount(code); 
-
-    // Cambiar a modo login después del registro exitoso
-    isLoginMode.value = true
-    formData.value = {
-      name: '',
-      surname: '',
-      email: formData.value.email, // Mantener el email
-      password: ''
-    }
   } catch (error) {
     throw error // Re-lanzar para que sea manejado por handleSubmit
   }
