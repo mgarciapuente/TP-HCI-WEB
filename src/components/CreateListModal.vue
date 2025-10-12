@@ -4,7 +4,6 @@ import { useListIcon } from '../composables/listIcons'
 
 interface CreateList {
     nombre: string
-    recurrente: boolean
     descripcion?: string
     selectedIcon?: string
 }
@@ -61,7 +60,6 @@ const iconRules = [
 
 const resetForm = () => {
     form.nombre = ''
-    form.recurrente = false
     form.descripcion = ''
     form.selectedIcon = 'mdi-cart'
 }

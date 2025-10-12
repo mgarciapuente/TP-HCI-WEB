@@ -110,9 +110,9 @@ const handleListRestored = async (restored: any) => {
       await productosComponent.value.refresh()
     }
 
-    // Show snackbar with restored list name if available
-    const listName = restored?.name || restored?.list?.name || 'Lista restaurada'
-    snackbar.value = { show: true, text: `${listName} restaurada`, color: 'success' }
+  // Show snackbar with restored list name if available (avoid duplicated 'restaurada')
+  const listName = restored?.name || restored?.list?.name
+  snackbar.value = { show: true, text: listName ? `${listName} restaurada` : 'Lista restaurada', color: 'primary' }
 
     return
   }
@@ -134,9 +134,9 @@ const handleListRestored = async (restored: any) => {
     console.warn('No se pudo obtener la lista restaurada desde API, usando datos provisionales', err)
   }
 
-  // show snackbar with list name when available
-  const listName = canonical?.name || 'Lista restaurada'
-  snackbar.value = { show: true, text: `${listName} restaurada`, color: 'success' }
+  // Show snackbar with list name when available (avoid duplicated 'restaurada')
+  const listName = canonical?.name
+  snackbar.value = { show: true, text: listName ? `${listName} restaurada` : 'Lista restaurada', color: 'primary' }
 
   // select restored list and refresh children
   selectedList.value = canonical
@@ -182,7 +182,7 @@ const toggleHistory = async () => {
       @toggle-history="toggleHistory" ref="listasComponent" @count-changed="(n) => listsCount = n" @list-restored="handleListRestored" @select="handleSelect" :historyMode="showHistory" />
 
     <ListaProductos v-if="selectedList || selectedPurchase" ref="productosComponent" :selectedList="selectedList"
-      :selectedPurchase="selectedPurchase" :addProductMode="addProductMode" :historyMode="showHistory" @exit-add-mode="exitAddMode" @enter-add-mode="enterAddMode" @category-changed="handleCategoryChanged" @list-completed="onListCompleted" />
+      :selectedPurchase="selectedPurchase" :addProductMode="addProductMode" :historyMode="showHistory" @exit-add-mode="exitAddMode" @enter-add-mode="enterAddMode" @category-changed="handleCategoryChanged" @list-completed="onListCompleted" @list-renamed="({ id, name }) => { if (selectedList && selectedList.id === id) { selectedList.name = name } if (listasComponent?.refresh) { listasComponent.refresh() } }" />
 
     <ListaAgregarProductos v-if="addProductMode" :selectedList="selectedList" :addProductMode="addProductMode"
       :selectedCategoryId="selectedCategoryId" @add-product="onProductAdded" />
