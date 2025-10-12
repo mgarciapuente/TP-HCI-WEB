@@ -153,7 +153,6 @@ const handleConfirm = async (data: CreateList) => {
         await listService.createList(auth.token, { 
             name: data.nombre, 
             description: data.descripcion, 
-            recurring: data.recurrente,
             metadata: {
                 icon: data.selectedIcon || 'mdi-cart'
             }

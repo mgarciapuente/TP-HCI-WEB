@@ -37,7 +37,6 @@ const formularioValido = ref(false)
 
 const form = reactive<CreateList>({
     nombre: '',
-    recurrente: false,
     descripcion: '',
     selectedIcon: 'mdi-cart'
 })
@@ -135,10 +134,6 @@ const handleCancel = () => {
                                         </v-list-item>
                                     </template>
                                 </v-select>
-                            </v-col>
-
-                            <v-col cols="12">
-                                <v-checkbox v-model="form.recurrente" label="Lista recurrente" density="comfortable" />
                             </v-col>
 
                             <v-col cols="12">
