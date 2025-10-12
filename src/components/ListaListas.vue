@@ -55,7 +55,6 @@ const getLists = async () => {
                 purchaseId: p.id,
                 productsCount: (p.items && Array.isArray(p.items) ? p.items.length : undefined) ?? ((p.list && Array.isArray(p.list.products)) ? p.list.products.length : undefined) ?? 0
             }));
-            console.log(res)
         } else {
             // Obtener las listas normalmente
             res = await listService.getLists(auth.token, params);
@@ -63,6 +62,9 @@ const getLists = async () => {
         // Manejar la respuesta que puede ser array directo o objeto con estructura
         if (Array.isArray(res)) {
             lists.value = res as Array<ShoppingList & { products?: any[]; purchaseId?: number; productsCount?: number }>
+        } else if (res && typeof res === 'object' && 'lists' in res && Array.isArray(res.lists)) {
+            // Respuesta paginada del backend
+            lists.value = res.lists as Array<ShoppingList & { products?: any[]; purchaseId?: number; productsCount?: number }>
         } else {
             lists.value = []
         }
@@ -239,12 +241,20 @@ onMounted(() => {
     align-items: center;
 }
 
-.fab-button-left {
-    position: sticky;
+.fab-button {
+    position: absolute;
     bottom: 1.5rem;
-    align-self: flex-end;
-    margin-right: 1.5rem;
-    z-index: 2;
+    right: 1.5rem;
+    z-index: 10;
+}
+
+:deep(.fab-button .v-btn) {
+    background-color: rgb(var(--v-theme-secondary)) !important;
+}
+
+:deep(.fab-button .v-btn:hover) {
+    background-color: rgb(var(--v-theme-secondary)) !important;
+    opacity: 0.9;
 }
 
 .lists-scroll {
@@ -303,7 +313,7 @@ onMounted(() => {
           :list="listToDelete"
           @confirmed="handleDeleteConfirmed"
         />
-        <v-btn v-if="!props.historyMode" color="secondary" class="fab-button-left" size="large" icon="mdi-playlist-plus" fab @click="handleOpen">
+        <v-btn v-if="!props.historyMode" color="secondary" class="fab-button" size="large" icon="mdi-playlist-plus" fab @click="handleOpen">
         </v-btn>
     </div>
 </template>
