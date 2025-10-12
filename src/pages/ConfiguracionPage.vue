@@ -35,108 +35,12 @@
                 Cambiar
               </v-btn>
             </div>
-            
-            <v-divider></v-divider>
-            
-            <div class="d-flex justify-space-between align-center py-2">
-              <div>
-                <div class="font-weight-medium">Eliminar cuenta</div>
-                <div class="text-caption text-grey">Elimina permanentemente tu cuenta</div>
-              </div>
-              <v-btn 
-                variant="outlined" 
-                color="error" 
-                size="small"
-                style="border-radius: 8px;"
-              >
-                Eliminar
-              </v-btn>
-            </div>
           </div>
         </v-card-text>
       </v-card>
 
-      <!-- Sección Notificaciones -->
-      <v-card class="mb-4" elevation="2" style="border-radius: 16px;">
-        <v-card-title class="d-flex align-center" style="background-color: rgba(70, 93, 70, 0.05);">
-          <v-icon class="mr-3" color="primary">mdi-bell</v-icon>
-          <span style="color: rgb(var(--v-theme-primary));">Notificaciones</span>
-        </v-card-title>
-        <v-card-text class="pa-4">
-          <div class="d-flex flex-column" style="gap: 16px;">
-            <div class="d-flex justify-space-between align-center">
-              <div>
-                <div class="font-weight-medium">Notificaciones por email</div>
-                <div class="text-caption text-grey">Recibe actualizaciones por correo</div>
-              </div>
-              <v-switch 
-                v-model="emailNotifications"
-                color="primary"
-                hide-details
-              ></v-switch>
-            </div>
-            
-            <div class="d-flex justify-space-between align-center">
-              <div>
-                <div class="font-weight-medium">Recordatorios de listas</div>
-                <div class="text-caption text-grey">Te avisamos cuando tengas listas pendientes</div>
-              </div>
-              <v-switch 
-                v-model="listReminders"
-                color="primary"
-                hide-details
-              ></v-switch>
-            </div>
-            
-            <div class="d-flex justify-space-between align-center">
-              <div>
-                <div class="font-weight-medium">Listas compartidas</div>
-                <div class="text-caption text-grey">Notificaciones cuando alguien modifica una lista compartida</div>
-              </div>
-              <v-switch 
-                v-model="sharedListNotifications"
-                color="primary"
-                hide-details
-              ></v-switch>
-            </div>
-          </div>
-        </v-card-text>
-      </v-card>
 
-      <!-- Sección Privacidad -->
-      <v-card class="mb-4" elevation="2" style="border-radius: 16px;">
-        <v-card-title class="d-flex align-center" style="background-color: rgba(70, 93, 70, 0.05);">
-          <v-icon class="mr-3" color="primary">mdi-shield-check</v-icon>
-          <span style="color: rgb(var(--v-theme-primary));">Privacidad</span>
-        </v-card-title>
-        <v-card-text class="pa-4">
-          <div class="d-flex flex-column" style="gap: 16px;">
-            <div class="d-flex justify-space-between align-center">
-              <div>
-                <div class="font-weight-medium">Perfil público</div>
-                <div class="text-caption text-grey">Permite que otros usuarios te encuentren</div>
-              </div>
-              <v-switch 
-                v-model="publicProfile"
-                color="primary"
-                hide-details
-              ></v-switch>
-            </div>
-            
-            <div class="d-flex justify-space-between align-center">
-              <div>
-                <div class="font-weight-medium">Compartir estadísticas</div>
-                <div class="text-caption text-grey">Ayuda a mejorar la app compartiendo datos anónimos</div>
-              </div>
-              <v-switch 
-                v-model="shareAnalytics"
-                color="primary"
-                hide-details
-              ></v-switch>
-            </div>
-          </div>
-        </v-card-text>
-      </v-card>
+
 
       <!-- Sección Sobre la app -->
       <v-card elevation="2" style="border-radius: 16px;">
@@ -201,12 +105,7 @@
 import { ref } from 'vue'
 import ChangePasswordModal from '../components/ChangePasswordModal.vue'
 
-// Estado de las configuraciones
-const emailNotifications = ref(true)
-const listReminders = ref(true)
-const sharedListNotifications = ref(true)
-const publicProfile = ref(false)
-const shareAnalytics = ref(true)
+
 
 // Estado del modal de cambio de contraseña
 const showChangePasswordModal = ref(false)
