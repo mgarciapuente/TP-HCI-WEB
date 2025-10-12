@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { reactive, ref, computed } from 'vue'
+import { useListIcon } from '../composables/listIcons'
 
 interface CreateList {
     nombre: string
     recurrente: boolean
     descripcion?: string
+    selectedIcon?: string
 }
 
 // 1. Cambiamos la prop a 'modelValue' para que funcione con v-model
@@ -28,19 +30,44 @@ const isVisible = computed({
     }
 })
 
+// Composables
+const { getAllAvailableListIcons, getSuggestedIcons } = useListIcon()
+
 const formRef = ref()
 const formularioValido = ref(false)
 
 const form = reactive<CreateList>({
     nombre: '',
     recurrente: false,
-    descripcion: ''
+    descripcion: '',
+    selectedIcon: 'mdi-cart'
 })
+
+// Computed para iconos disponibles
+const availableIconsForSelection = computed(() => {
+  const allIcons = getAllAvailableListIcons()
+  return allIcons.map(iconData => ({
+    ...iconData,
+    displayName: iconData.name
+  }))
+})
+
+// Computed para sugerencias de iconos basadas en el nombre
+const suggestedIcons = computed(() => {
+  if (!form.nombre.trim()) return []
+  return getSuggestedIcons(form.nombre)
+})
+
+// Reglas de validación para el icono
+const iconRules = [
+  (v: string) => !!v || 'Selecciona un icono para la lista',
+]
 
 const resetForm = () => {
     form.nombre = ''
     form.recurrente = false
     form.descripcion = ''
+    form.selectedIcon = 'mdi-cart'
 }
 
 const handleConfirm = () => {
@@ -61,6 +88,10 @@ const handleCancel = () => {
 .v-card-title {
     background-color: rgba(var(--v-theme-primary), 0.06);
 }
+
+.cursor-pointer {
+    cursor: pointer;
+}
 </style>
 
 <template>
@@ -80,6 +111,59 @@ const handleCancel = () => {
                                     placeholder="ej: Compras semanal" variant="solo" persistent-placeholder
                                     :rules="[v => !!v || 'El nombre es requerido']" required density="comfortable"
                                     hide-details="auto" />
+                            </v-col>
+
+                            <v-col cols="12">
+                                <v-select
+                                    v-model="form.selectedIcon"
+                                    label="Icono de la lista *"
+                                    :items="availableIconsForSelection"
+                                    item-title="displayName"
+                                    item-value="icon"
+                                    variant="solo"
+                                    :rules="iconRules"
+                                    required
+                                    density="comfortable"
+                                    hide-details="auto"
+                                >
+                                    <template v-slot:selection="{ item }">
+                                        <div class="d-flex align-center">
+                                            <v-icon :icon="item.raw.icon" size="20" class="me-2" color="primary" />
+                                            <span>{{ item.raw.displayName }}</span>
+                                        </div>
+                                    </template>
+                                    
+                                    <template v-slot:item="{ props, item }">
+                                        <v-list-item v-bind="props" class="pa-2">
+                                            <template v-slot:prepend>
+                                                <v-icon :icon="item.raw.icon" size="20" class="me-3" color="primary" />
+                                            </template>
+                                        </v-list-item>
+                                    </template>
+                                </v-select>
+                            </v-col>
+
+                            <v-col cols="12" v-if="suggestedIcons.length > 0">
+                                <v-card variant="outlined" class="pa-3">
+                                    <v-card-subtitle class="pa-0 mb-2">
+                                        <v-icon size="16" class="me-1">mdi-lightbulb-outline</v-icon>
+                                        Sugerencias basadas en el nombre
+                                    </v-card-subtitle>
+                                    <div class="d-flex gap-2">
+                                        <v-chip
+                                            v-for="suggestion in suggestedIcons"
+                                            :key="suggestion.icon"
+                                            @click="form.selectedIcon = suggestion.icon"
+                                            :color="form.selectedIcon === suggestion.icon ? 'primary' : 'default'"
+                                            variant="outlined"
+                                            size="small"
+                                            class="cursor-pointer"
+                                        >
+                                            <v-icon start :icon="suggestion.icon" size="16" />
+                                            {{ suggestion.name }}
+                                        </v-chip>
+                                    </div>
+                                </v-card>
                             </v-col>
 
                             <v-col cols="12">

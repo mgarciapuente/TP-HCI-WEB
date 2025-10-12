@@ -213,7 +213,7 @@ const handlePasswordReset = () => {
       elevation="8">
       <!-- Header con logo y título -->
       <div class="text-center mb-6">
-        <v-img :src="logoImg" alt="Canasta Logo" style="width: 60px; height: 60px; margin: 0 auto 16px;" />
+        <v-img :src="logoImg" alt="Canasta Logo" style="width: 10em; height: 10em; margin: auto;" />
         <h1 class="text-h4 mb-2" style="color: #465D46; font-weight: 600;">
           {{ isLoginMode ? 'Iniciar Sesión' : 'Crear Cuenta' }}
         </h1>

@@ -4,11 +4,13 @@ import { ref, defineProps, onMounted } from 'vue';
 import { purchasesService } from '@/services/purchasesService'
 import { useAuthStore } from '@/stores/auth'
 import { listService } from '@/services/listService'
+import { useListIcon } from '../composables/listIcons'
 
 interface CreateList {
     nombre: string
     recurrente: boolean
     descripcion?: string
+    selectedIcon?: string
 }
 
 interface Props {
@@ -30,6 +32,7 @@ const emit = defineEmits<{
 const isModalVisible = ref(false);
 
 const auth = useAuthStore()
+const { getListIcon } = useListIcon()
 const lists = ref<Props['listItems']>([])
 const loading = ref(false)
 
@@ -108,7 +111,14 @@ const handleConfirm = async (data: CreateList) => {
     // Crear la lista por API y refrescar
     if (!auth.token) return
     try {
-        await listService.createList(auth.token, { name: data.nombre, description: data.descripcion, recurring: data.recurrente })
+        await listService.createList(auth.token, { 
+            name: data.nombre, 
+            description: data.descripcion, 
+            recurring: data.recurrente,
+            metadata: {
+                icon: data.selectedIcon || 'mdi-cart'
+            }
+        })
         // Refrescar listas para mostrar la nueva
         await getLists()
     } catch (err) {
@@ -220,7 +230,7 @@ onMounted(() => {
                 :class="{ 'selected': props.selectedList && props.selectedList.id === list.id }" color="primary"
                 @click="onSelect(list)">
                 <v-card-text class="list-item-content">
-                    <v-icon class="list-icon" color="white">mdi-format-list-bulleted</v-icon>
+                    <v-icon class="list-icon" color="white">{{ getListIcon(list) }}</v-icon>
                     <div class="list-text">
                         <h3 class="list-name">{{ list.name }}</h3>
                         <p class="list-count">{{ (list.products && list.products.length) || 'Sin' }} Productos</p>

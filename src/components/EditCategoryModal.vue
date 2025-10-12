@@ -43,7 +43,6 @@
                 <template v-slot:prepend>
                   <v-icon :icon="item.raw.icon" size="20" class="me-3" color="primary" />
                 </template>
-                <v-list-item-title>{{ item.raw.displayName }}</v-list-item-title>
               </v-list-item>
             </template>
           </v-select>
@@ -90,7 +89,7 @@ const emit = defineEmits<{
 const authStore = useAuthStore()
 
 // Composables
-const { getAvailableIcons, getCategoryIcon } = useCategoryIcon()
+const { getAllAvailableIcons, getCategoryIcon } = useCategoryIcon()
 
 // Estado reactivo
 const dialog = ref(props.modelValue)
@@ -117,28 +116,10 @@ const iconRules = [
 
 // Computed para iconos disponibles
 const availableIconsForSelection = computed(() => {
-  // Filtrar las categorías existentes excluyendo la que estamos editando
-  const otherCategories = existingCategories.value.filter(cat => cat.id !== props.category?.id)
-  const availableIcons = getAvailableIcons(otherCategories)
+  // Ahora mostramos todos los iconos disponibles, sin filtrar por uso
+  const allIcons = getAllAvailableIcons()
   
-  // Si la categoría actual tiene un icono, incluirlo en las opciones disponibles
-  if (props.category) {
-    const currentIcon = getCategoryIcon(props.category)
-    const isCurrentIconInList = availableIcons.some(icon => icon.icon === currentIcon)
-    
-    if (!isCurrentIconInList) {
-      // Buscar el nombre del icono actual en la lista completa
-      const { getAllAvailableIcons } = useCategoryIcon()
-      const allIcons = getAllAvailableIcons()
-      const currentIconData = allIcons.find(icon => icon.icon === currentIcon)
-      
-      if (currentIconData) {
-        availableIcons.unshift(currentIconData)
-      }
-    }
-  }
-  
-  return availableIcons.map(iconData => ({
+  return allIcons.map(iconData => ({
     ...iconData,
     displayName: iconData.name
   }))

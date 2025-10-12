@@ -88,7 +88,7 @@ const emit = defineEmits<{
 const authStore = useAuthStore()
 
 // Composables
-const { getAvailableIcons } = useCategoryIcon()
+const { getAllAvailableIcons } = useCategoryIcon()
 
 // Estado reactivo
 const dialog = ref(props.modelValue)
@@ -115,8 +115,8 @@ const iconRules = [
 
 // Computed para iconos disponibles
 const availableIconsForSelection = computed(() => {
-  const availableIcons = getAvailableIcons(existingCategories.value)
-  return availableIcons.map(iconData => ({
+  const allIcons = getAllAvailableIcons()
+  return allIcons.map(iconData => ({
     ...iconData,
     displayName: iconData.name
   }))
