@@ -39,6 +39,25 @@ const routes = [
     }
   },
   {
+    path: '/auth/verify',
+    name: 'verification',
+    component: () => import('../pages/VerificationPage.vue'),
+    beforeEnter: (_to: any, _from: any, next: any) => {
+      const authStore = useAuthStore()
+      // Si el usuario ya está logueado, redirigir al perfil
+      if (authStore.isLoggedIn) {
+        next('/perfil')
+      } else {
+        // Verificar que tenga email en la query, si no redirigir al registro
+        if (!_to.query.email) {
+          next('/auth/login')
+        } else {
+          next()
+        }
+      }
+    }
+  },
+  {
     path: '/listas',
     name: 'listas',
     component: ListsPage,
