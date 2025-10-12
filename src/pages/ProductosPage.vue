@@ -7,10 +7,9 @@
 
       <div class="search-section mb-4">
         <SearchBar v-model="searchTerm" placeholder="Buscar productos..." :debounce-ms="500" />
-        <SearchBar v-model="searchTerm" placeholder="Buscar productos..." :debounce-ms="500" />
       </div>
 
-      <CategoryFilters class="category-filters" @category-changed="handleCategoryChange" />
+      <CategoryFilters class="category-filters" mode="full" @category-changed="handleCategoryChange" />
 
       <div v-if="loading" class="d-flex justify-center py-8">
         <v-progress-circular color="secondary" indeterminate size="48" />

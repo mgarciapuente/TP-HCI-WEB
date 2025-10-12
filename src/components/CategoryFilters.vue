@@ -6,6 +6,7 @@
         selected-class="text-secondary"
         filter
         variant="outlined"
+        show-arrows
         @update:model-value="handleCategoryChange"
         class="flex-nowrap"
       >
@@ -16,8 +17,8 @@
         :color="selectedCategory === category.id ? 'secondary' : undefined"
         :variant="selectedCategory === category.id ? 'elevated' : 'outlined'"
         class="category-chip"
-        @mouseenter="handleChipMouseEnter(category.id)"
-        @mouseleave="handleChipMouseLeave"
+        @mouseenter="isFullMode ? handleChipMouseEnter(category.id) : undefined"
+        @mouseleave="isFullMode ? handleChipMouseLeave : undefined"
       >
         <template v-slot:prepend>
           <v-icon 
@@ -31,8 +32,8 @@
         
         <span class="category-name">{{ category.name }}</span>
         
-        <!-- Menú de opciones visible solo con hover -->
-        <template v-slot:append v-if="hoveredCategory === category.id">
+        <!-- Menú de opciones visible solo con hover y en modo completo -->
+        <template v-slot:append v-if="isFullMode && hoveredCategory === category.id">
           <v-menu 
             :open-on-hover="false" 
             :close-on-content-click="true"
@@ -78,8 +79,9 @@
       </v-chip>
     </v-chip-group>
     
-    <!-- Botón independiente para agregar nueva categoría -->
+    <!-- Botón independiente para agregar nueva categoría (solo en modo completo) -->
     <v-btn
+      v-if="isFullMode"
       @click="openAddCategoryModal"
       variant="outlined"
       color="secondary"
@@ -95,31 +97,34 @@
     </v-btn>
     </div>
     
-    <!-- Modal para agregar categoría -->
-    <AddCategoryModal
-      v-model="showAddCategoryModal"
-      @category-created="onCategoryCreated"
-    />
-    
-    <!-- Modal para editar categoría -->
-    <EditCategoryModal
-      v-model="showEditCategoryModal"
-      :category="categoryToEdit"
-      @category-updated="onCategoryUpdated"
-    />
-    
-    <!-- Modal para eliminar categoría -->
-    <DeleteCategoryModal
-      ref="deleteCategoryModalRef"
-      v-model="showDeleteCategoryModal"
-      :category="categoryToDelete"
-      @confirmed="onDeleteConfirmed"
-    />
+    <!-- Modales (solo en modo completo) -->
+    <template v-if="isFullMode">
+      <!-- Modal para agregar categoría -->
+      <AddCategoryModal
+        v-model="showAddCategoryModal"
+        @category-created="onCategoryCreated"
+      />
+      
+      <!-- Modal para editar categoría -->
+      <EditCategoryModal
+        v-model="showEditCategoryModal"
+        :category="categoryToEdit"
+        @category-updated="onCategoryUpdated"
+      />
+      
+      <!-- Modal para eliminar categoría -->
+      <DeleteCategoryModal
+        ref="deleteCategoryModalRef"
+        v-model="showDeleteCategoryModal"
+        :category="categoryToDelete"
+        @confirmed="onDeleteConfirmed"
+      />
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { categoriesService, productsService, type Category } from '../services/productsService'
 import { useAuthStore } from '../stores/auth'
 import { useCategoryIcon } from '../composables/categoryIcons'
@@ -128,6 +133,10 @@ import EditCategoryModal from './EditCategoryModal.vue'
 import DeleteCategoryModal from './DeleteCategoryModal.vue'
 
 // Props y emits
+const props = defineProps<{
+  mode?: 'full' | 'filter-only'
+}>()
+
 const emit = defineEmits<{
   categoryChanged: [categoryId: number | null]
 }>()
@@ -137,6 +146,9 @@ const authStore = useAuthStore()
 
 // Composables
 const { getCategoryIcon } = useCategoryIcon()
+
+// Computed
+const isFullMode = computed(() => props.mode !== 'filter-only')
 
 // Estado reactivo
 const categories = ref<Category[]>([])
@@ -316,6 +328,40 @@ onMounted(() => {
 :deep(.v-chip-group) {
   flex-wrap: nowrap !important;
   overflow: visible !important;
+}
+
+/* Estilos para las flechas de navegación */
+:deep(.v-chip-group .v-slide-group__prev),
+:deep(.v-chip-group .v-slide-group__next) {
+  min-width: 32px !important;
+  max-width: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid #ddd !important;
+  border-radius: 16px !important;
+  margin: 0 4px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  align-self: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+:deep(.v-chip-group .v-slide-group__prev .v-btn),
+:deep(.v-chip-group .v-slide-group__next .v-btn) {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 16px !important;
+  min-width: auto !important;
+  margin: 0 !important;
+}
+
+:deep(.v-chip-group .v-slide-group__prev:hover),
+:deep(.v-chip-group .v-slide-group__next:hover) {
+  background-color: rgb(var(--v-theme-secondary)) !important;
+  color: white !important;
+  border-color: rgb(var(--v-theme-secondary)) !important;
 }
 
 :deep(.v-chip) {
