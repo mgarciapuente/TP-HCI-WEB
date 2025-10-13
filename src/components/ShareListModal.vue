@@ -38,6 +38,45 @@
         >
           {{ successMessage }}
         </v-alert>
+
+        <!-- Lista de usuarios con acceso -->
+        <div v-if="sharedUsers.length > 0 || loadingUsers" class="mt-4">
+          <v-divider class="mb-3"></v-divider>
+          <p class="text-body-2 font-weight-medium mb-3">
+            <v-icon size="16" class="me-1">mdi-account-multiple</v-icon>
+            Personas con acceso a la lista:
+          </p>
+          
+          <v-progress-linear v-if="loadingUsers" indeterminate class="mb-3"></v-progress-linear>
+          
+          <div v-for="user in sharedUsers" :key="user.id" class="d-flex align-center justify-space-between pa-2 mb-2 bg-grey-lighten-5 rounded">
+            <div class="d-flex align-center">
+              <v-icon color="grey-darken-1" class="me-2">mdi-account</v-icon>
+              <div>
+                <div class="text-body-2 font-weight-medium">
+                  {{ user.name && user.surname ? `${user.name} ${user.surname}` : user.email }}
+                </div>
+                <div v-if="user.name && user.surname" class="text-caption text-grey-darken-1">
+                  {{ user.email }}
+                </div>
+              </div>
+            </div>
+            <v-btn
+              size="small"
+              variant="outlined"
+              color="error"
+              @click="revokeAccess(user)"
+              :disabled="loadingUsers"
+            >
+              <v-icon size="16" class="me-1">mdi-account-remove</v-icon>
+              Revocar
+            </v-btn>
+          </div>
+          
+          <p v-if="!loadingUsers && sharedUsers.length === 0" class="text-caption text-grey-darken-1 text-center pa-3">
+            No hay usuarios con acceso compartido a esta lista.
+          </p>
+        </div>
       </v-card-text>
 
       <v-card-actions class="pa-4 pt-0">
@@ -64,8 +103,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { listService } from '@/services/listService'
+import type { SharedUser } from '@/types/listTypes'
 import { useAuthStore } from '@/stores/auth'
 
 interface Props {
@@ -88,6 +128,8 @@ const email = ref('')
 const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const sharedUsers = ref<SharedUser[]>([])
+const loadingUsers = ref(false)
 
 // Computed
 const isVisible = computed({
@@ -110,6 +152,13 @@ const emailRules = [
   (_v: string) => isValidEmail.value || 'Ingresa un email válido'
 ]
 
+// Watcher para cargar usuarios cuando se abre el modal
+watch(() => props.modelValue, (newValue) => {
+  if (newValue && props.listId) {
+    loadSharedUsers()
+  }
+})
+
 // Métodos
 const clearError = () => {
   errorMessage.value = ''
@@ -120,6 +169,7 @@ const resetForm = () => {
   email.value = ''
   errorMessage.value = ''
   successMessage.value = ''
+  sharedUsers.value = []
 }
 
 const handleShare = async () => {
@@ -133,11 +183,16 @@ const handleShare = async () => {
     successMessage.value = `Lista compartida exitosamente con ${email.value}`
     emit('shared', email.value)
     
-    // Cerrar el modal después de 1.5 segundos
+    // Recargar lista de usuarios compartidos
+    await loadSharedUsers()
+    
+    // Limpiar solo el campo de email, mantener el modal abierto para ver la lista actualizada
+    email.value = ''
+    
+    // Limpiar mensaje después de un tiempo
     setTimeout(() => {
-      isVisible.value = false
-      resetForm()
-    }, 1500)
+      successMessage.value = ''
+    }, 3000)
 
   } catch (error: any) {
     console.error('Error al compartir lista:', error)
@@ -160,6 +215,41 @@ const handleShare = async () => {
     }
   } finally {
     loading.value = false
+  }
+}
+
+// Cargar usuarios con acceso a la lista
+const loadSharedUsers = async () => {
+  if (!props.listId || !auth.token) return
+  
+  loadingUsers.value = true
+  try {
+    const users = await listService.getSharedUsers(auth.token, props.listId)
+    sharedUsers.value = users || []
+  } catch (error) {
+    console.error('Error al cargar usuarios compartidos:', error)
+    sharedUsers.value = []
+  } finally {
+    loadingUsers.value = false
+  }
+}
+
+// Revocar acceso de un usuario
+const revokeAccess = async (user: SharedUser) => {
+  if (!props.listId || !auth.token) return
+  
+  try {
+    await listService.revokeShare(auth.token, props.listId, user.id)
+    successMessage.value = `Acceso revocado para ${user.name || user.email}`
+    // Recargar la lista de usuarios
+    await loadSharedUsers()
+    // Limpiar mensaje después de un tiempo
+    setTimeout(() => {
+      successMessage.value = ''
+    }, 3000)
+  } catch (error) {
+    console.error('Error al revocar acceso:', error)
+    errorMessage.value = 'Error al revocar acceso. Intenta nuevamente.'
   }
 }
 

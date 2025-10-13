@@ -285,6 +285,6 @@ export const listService = {
     )
 
     return handleApiResponse<ListItem>(response)
-  }
+  },
 
 }
