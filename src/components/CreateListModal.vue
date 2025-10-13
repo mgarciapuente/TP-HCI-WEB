@@ -78,12 +78,18 @@ const handleCancel = () => {
 </script>
 
 <style scoped>
-.v-card-title {
-    background-color: rgba(var(--v-theme-primary), 0.06);
-}
-
 .cursor-pointer {
     cursor: pointer;
+}
+
+:deep(.v-btn--variant-elevated.text-secondary) {
+  background-color: rgb(var(--v-theme-secondary)) !important;
+  color: white !important;
+}
+
+:deep(.v-btn--variant-elevated.text-secondary:hover) {
+  background-color: rgb(var(--v-theme-secondary)) !important;
+  opacity: 0.9;
 }
 </style>
 
@@ -91,7 +97,7 @@ const handleCancel = () => {
     <v-dialog v-model="isVisible" max-width="600" persistent :fullscreen="$vuetify.display.xs">
         <v-card>
             <v-card-title class="d-flex align-center pa-4">
-                <v-icon start>mdi-playlist-plus</v-icon>
+                <v-icon start color="secondary">mdi-playlist-plus</v-icon>
                 Crear nueva lista
             </v-card-title>
 
@@ -149,7 +155,12 @@ const handleCancel = () => {
             <v-card-actions class="pa-4">
                 <v-spacer />
                 <v-btn @click="handleCancel" variant="outlined">Cancelar</v-btn>
-                <v-btn color="primary" :disabled="!formularioValido || !form.nombre.trim()" @click="handleConfirm">
+                <v-btn 
+                    color="secondary" 
+                    variant="elevated"
+                    :disabled="!formularioValido || !form.nombre.trim()" 
+                    @click="handleConfirm"
+                >
                     Crear lista
                 </v-btn>
             </v-card-actions>

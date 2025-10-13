@@ -2,8 +2,8 @@
   <v-dialog v-model="isVisible" max-width="500" persistent>
     <v-card>
       <v-card-title class="d-flex align-center pa-4">
-        <v-icon class="me-2" color="primary">mdi-share-variant</v-icon>
-        <span>Compartir lista</span>
+        <v-icon start color="secondary">mdi-share-variant</v-icon>
+        Compartir lista
       </v-card-title>
 
       <v-card-text class="pa-4">
@@ -38,14 +38,14 @@
       <v-card-actions class="pa-4 pt-0">
         <v-spacer />
         <v-btn
-          variant="text"
+          variant="outlined"
           @click="handleCancel"
           :disabled="loading"
         >
           Cancelar
         </v-btn>
         <v-btn
-          color="primary"
+          color="secondary"
           variant="elevated"
           @click="handleShare"
           :loading="loading"
@@ -159,7 +159,13 @@ const handleCancel = () => {
 </script>
 
 <style scoped>
-.v-card-title {
-  background-color: rgba(var(--v-theme-primary), 0.06);
+:deep(.v-btn--variant-elevated.text-secondary) {
+  background-color: rgb(var(--v-theme-secondary)) !important;
+  color: white !important;
+}
+
+:deep(.v-btn--variant-elevated.text-secondary:hover) {
+  background-color: rgb(var(--v-theme-secondary)) !important;
+  opacity: 0.9;
 }
 </style>

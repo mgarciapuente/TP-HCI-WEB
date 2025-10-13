@@ -49,6 +49,10 @@
       :product="selectedProduct"
       @product-updated="handleProductUpdated"
     />
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.text }}
+    </v-snackbar>
   </div>
 
 </template>
@@ -78,6 +82,7 @@ const totalCount = ref(0)
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const selectedProduct = ref<Product | null>(null)
+const snackbar = ref({ show: false, text: '', color: 'success' })
 
 // Métodos
 const loadProducts = async (resetPage = false) => {
@@ -142,7 +147,7 @@ const handleDeleteProduct = async (product: Product) => {
     await loadProducts()
   } catch (error) {
     console.error('Error al eliminar producto:', error)
-    alert('Error al eliminar el producto. Por favor intenta de nuevo.')
+    snackbar.value = { show: true, text: 'Error al eliminar el producto. Por favor intenta de nuevo.', color: 'error' }
   }
 }
 
@@ -152,11 +157,13 @@ const openAddProductModal = () => {
 
 const handleProductCreated = () => {
   loadProducts()
+  snackbar.value = { show: true, text: 'Producto creado exitosamente', color: 'success' }
 }
 
 const handleProductUpdated = async () => {
   selectedProduct.value = null
   await loadProducts()
+  snackbar.value = { show: true, text: 'Producto actualizado exitosamente', color: 'success' }
 }
 
 // Lifecycle

@@ -428,7 +428,7 @@ defineExpose({ refresh: fetchItems })
                     </v-btn>
                 </div>
             </div>
-            <CategoryFilters v-if="!props.historyMode" @categoryChanged="onCategoryChanged" />
+            <CategoryFilters v-if="!props.historyMode" mode="filter-only" @categoryChanged="onCategoryChanged" />
         </div>
         <div class="products-scroll">
             <div v-if="loading" class="loading"><v-progress-circular color="secondary" indeterminate size="36" /></div>

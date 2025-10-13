@@ -65,6 +65,10 @@
         </v-btn>
       </v-card-actions>
     </v-card>
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.text }}
+    </v-snackbar>
   </v-dialog>
 </template>
 
@@ -90,6 +94,11 @@ const authStore = useAuthStore()
 // Estado reactivo
 const dialog = ref(props.modelValue)
 const valid = ref(false)
+const snackbar = ref({
+  show: false,
+  text: '',
+  color: 'success'
+})
 const loading = ref(false)
 const formRef = ref()
 
@@ -169,7 +178,7 @@ const handleSubmit = async () => {
     dialog.value = false
     
     // Mostrar mensaje de éxito
-    alert('Contraseña cambiada exitosamente')
+    snackbar.value = { show: true, text: 'Contraseña cambiada exitosamente', color: 'success' }
     
   } catch (error: any) {
     console.error('Error al cambiar contraseña:', error)
@@ -186,7 +195,7 @@ const handleSubmit = async () => {
       }
     }
     
-    alert(errorMessage)
+    snackbar.value = { show: true, text: errorMessage, color: 'error' }
     
   } finally {
     loading.value = false

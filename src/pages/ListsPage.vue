@@ -36,13 +36,13 @@ const snackbar = ref({ show: false, text: '', color: 'success' })
 
 const onListCompleted = async (listId: number) => {
   if (!auth.token) {
-    window.alert('No estás autenticado')
+    snackbar.value = { show: true, text: 'No estás autenticado', color: 'error' }
     return
   }
 
   try {
     await listService.purchaseList(auth.token, listId, { metadata: { auto: true } })
-    window.alert('Lista marcada como comprada y movida al historial')
+    snackbar.value = { show: true, text: 'Lista marcada como comprada y movida al historial', color: 'success' }
     // Refrescar el panel de listas
     if (listasComponent.value && typeof listasComponent.value.refresh === 'function') {
       await listasComponent.value.refresh()
@@ -53,7 +53,7 @@ const onListCompleted = async (listId: number) => {
     }
   } catch (err) {
     console.error('Error al marcar lista como completada:', err)
-    window.alert('No se pudo completar la lista. Intente nuevamente.')
+    snackbar.value = { show: true, text: 'No se pudo completar la lista. Intente nuevamente.', color: 'error' }
   }
 }
 
@@ -112,7 +112,7 @@ const handleListRestored = async (restored: any) => {
 
   // Show snackbar with restored list name if available (avoid duplicated 'restaurada')
   const listName = restored?.name || restored?.list?.name
-  snackbar.value = { show: true, text: listName ? `${listName} restaurada` : 'Lista restaurada', color: 'primary' }
+  snackbar.value = { show: true, text: listName ? `${listName} restaurada` : 'Lista restaurada', color: 'success' }
 
     return
   }
@@ -136,7 +136,7 @@ const handleListRestored = async (restored: any) => {
 
   // Show snackbar with list name when available (avoid duplicated 'restaurada')
   const listName = canonical?.name
-  snackbar.value = { show: true, text: listName ? `${listName} restaurada` : 'Lista restaurada', color: 'primary' }
+  snackbar.value = { show: true, text: listName ? `${listName} restaurada` : 'Lista restaurada', color: 'success' }
 
   // select restored list and refresh children
   selectedList.value = canonical

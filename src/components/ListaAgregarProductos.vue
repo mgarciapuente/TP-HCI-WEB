@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
+import { VSnackbar } from 'vuetify/components'
 import CantidadModal from './CantidadModal.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -28,6 +29,7 @@ const searchQuery = ref('')
 const showAddModal = ref(false)
 const productToAdd = ref<any>(null)
 const addForm = reactive({ quantity: 1, unit: 'unidades' })
+const snackbar = ref({ show: false, text: '', color: 'success' })
 
 // Fetch global products list (to add to shopping list)
 const fetchProducts = async () => {
@@ -87,9 +89,10 @@ const confirmAdd = async () => {
         // Emitir evento para que el padre refresque
         emit('add-product', productToAdd.value.id)
         showAddModal.value = false
+        snackbar.value = { show: true, text: 'Producto agregado a la lista', color: 'success' }
     } catch (err) {
         console.error('Error agregando producto a la lista:', err)
-        window.alert('No se pudo agregar el producto')
+        snackbar.value = { show: true, text: 'No se pudo agregar el producto', color: 'error' }
     }
 }
 
@@ -220,5 +223,9 @@ const confirmAdd = async () => {
                             @update:modelValue="showAddModal = $event"
                             @save="({ quantity, unit }) => { addForm.quantity = quantity; addForm.unit = unit; confirmAdd(); }"
                         />
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+        {{ snackbar.text }}
+    </v-snackbar>
     </div>
 </template>

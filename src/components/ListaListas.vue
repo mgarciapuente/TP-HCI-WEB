@@ -39,6 +39,7 @@ const loading = ref(false)
 const showDeleteModal = ref(false)
 const listToDelete = ref<any>(null)
 const deleteModalRef = ref<any>(null)
+const snackbar = ref({ show: false, text: '', color: 'success' })
 
 const getLists = async () => {
     if (!auth.token) return
@@ -143,8 +144,10 @@ const toggleRecurring = async (list: any) => {
     try {
         await listService.updateList(auth.token, list.id, { recurring: !list.recurring })
         await getLists()
+        snackbar.value = { show: true, text: list.recurring ? 'Lista marcada como no recurrente' : 'Lista marcada como recurrente', color: 'success' }
     } catch (err) {
         console.error('Error actualizando recurrencia:', err)
+        snackbar.value = { show: true, text: 'Error al cambiar recurrencia', color: 'error' }
     }
 }
 
@@ -155,14 +158,17 @@ const handleConfirm = async (data: CreateList) => {
         await listService.createList(auth.token, { 
             name: data.nombre, 
             description: data.descripcion, 
+            recurring: false,
             metadata: {
                 icon: data.selectedIcon || 'mdi-cart'
             }
         })
         // Refrescar listas para mostrar la nueva
         await getLists()
+        snackbar.value = { show: true, text: 'Lista creada exitosamente', color: 'success' }
     } catch (err) {
         console.error('Error creando lista:', err)
+        snackbar.value = { show: true, text: 'Error al crear la lista', color: 'error' }
     }
 }
 
@@ -182,8 +188,10 @@ const handleDeleteConfirmed = async (list: any) => {
             emit('select', { kind: 'list', payload: null })
         }
         await getLists()
+        snackbar.value = { show: true, text: 'Lista eliminada exitosamente', color: 'success' }
     } catch (err) {
         console.error('Error eliminando lista:', err)
+        snackbar.value = { show: true, text: 'Error al eliminar la lista', color: 'error' }
     } finally {
         if (deleteModalRef.value) deleteModalRef.value.finishLoading()
     }
@@ -315,5 +323,9 @@ onMounted(() => {
         />
         <v-btn v-if="!props.historyMode" color="secondary" class="fab-button" size="large" icon="mdi-playlist-plus" fab @click="handleOpen">
         </v-btn>
+
+        <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+            {{ snackbar.text }}
+        </v-snackbar>
     </div>
 </template>

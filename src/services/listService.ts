@@ -81,8 +81,15 @@ export const listService = {
 
   // Crear nueva lista
   async createList(token: string, payload: ShoppingListCreate): Promise<ShoppingList> {
+    console.log('📝 listService.createList llamado')
+    console.log('🔑 Token presente:', !!token)
+    console.log('📊 Payload:', payload)
+    
+    const url = createApiUrl(API_CONFIG.ENDPOINTS.LISTS.ROOT)
+    console.log('📍 URL:', url)
+    
     const response = await fetch(
-      createApiUrl(API_CONFIG.ENDPOINTS.LISTS.ROOT),
+      url,
       {
         method: 'POST',
         headers: createAuthHeaders(token),
@@ -90,7 +97,15 @@ export const listService = {
       }
     )
 
-    return handleApiResponse<ShoppingList>(response)
+    console.log('📡 Respuesta createList:')
+    console.log('   - Status:', response.status)
+    console.log('   - OK:', response.ok)
+    console.log('   - StatusText:', response.statusText)
+
+    const result = await handleApiResponse<ShoppingList>(response)
+    console.log('✅ Lista creada:', result)
+    
+    return result
   },
 
   // Obtener listas (con query params opcionales)

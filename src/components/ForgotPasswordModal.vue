@@ -85,6 +85,10 @@
         </v-btn>
       </v-card-actions>
     </v-card>
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.text }}
+    </v-snackbar>
   </v-dialog>
 </template>
 
@@ -105,6 +109,11 @@ const emit = defineEmits<{
 
 // Estado reactivo
 const dialog = ref(props.modelValue)
+const snackbar = ref({
+  show: false,
+  text: '',
+  color: 'success'
+})
 const step = ref(1) // 1 = enviar código, 2 = resetear contraseña
 const emailValid = ref(false)
 const resetValid = ref(false)
@@ -223,7 +232,7 @@ const sendRecoveryCode = async () => {
       }
     }
     
-    alert(errorMessage)
+    snackbar.value = { show: true, text: errorMessage, color: 'error' }
     
   } finally {
     loading.value = false
@@ -248,7 +257,7 @@ const resetPassword = async () => {
     dialog.value = false
     
     // Mostrar mensaje de éxito
-    alert('Contraseña cambiada exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.')
+    snackbar.value = { show: true, text: 'Contraseña cambiada exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.', color: 'success' }
     
   } catch (error: any) {
     console.error('Error al resetear contraseña:', error)
@@ -262,7 +271,7 @@ const resetPassword = async () => {
       }
     }
     
-    alert(errorMessage)
+    snackbar.value = { show: true, text: errorMessage, color: 'error' }
     
   } finally {
     loading.value = false

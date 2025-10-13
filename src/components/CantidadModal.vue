@@ -1,17 +1,39 @@
 <template>
   <v-dialog v-model="dialogProxy" max-width="420">
     <v-card>
-      <v-card-title>{{ modalTitle }}</v-card-title>
-      <v-card-text>
+      <v-card-title class="d-flex align-center pa-4">
+        <v-icon start color="secondary">mdi-package-variant</v-icon>
+        {{ modalTitle }}
+      </v-card-title>
+      <v-card-text class="pa-4">
         <v-form>
-          <v-text-field v-model.number="localQuantity" label="Cantidad" type="number" min="0.01" step="0.01" />
-          <v-select v-model="localUnit" :items="units" label="Unidad" />
+          <v-text-field 
+            v-model.number="localQuantity" 
+            label="Cantidad" 
+            type="number" 
+            min="0.01" 
+            step="0.01" 
+            variant="outlined"
+            class="mb-4"
+          />
+          <v-select 
+            v-model="localUnit" 
+            :items="units" 
+            label="Unidad" 
+            variant="outlined"
+          />
         </v-form>
       </v-card-text>
-      <v-card-actions>
+      <v-card-actions class="pa-4">
         <v-spacer />
         <v-btn variant="outlined" @click="handleCancel">Cancelar</v-btn>
-        <v-btn color="primary" @click="handleSave">{{ mode === 'edit' ? 'Guardar' : 'Agregar' }}</v-btn>
+        <v-btn 
+          color="secondary" 
+          variant="elevated" 
+          @click="handleSave"
+        >
+          {{ mode === 'edit' ? 'Guardar' : 'Agregar' }}
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -57,3 +79,15 @@ const handleSave = () => {
   emit('update:modelValue', false)
 }
 </script>
+
+<style scoped>
+:deep(.v-btn--variant-elevated.text-secondary) {
+  background-color: rgb(var(--v-theme-secondary)) !important;
+  color: white !important;
+}
+
+:deep(.v-btn--variant-elevated.text-secondary:hover) {
+  background-color: rgb(var(--v-theme-secondary)) !important;
+  opacity: 0.9;
+}
+</style>

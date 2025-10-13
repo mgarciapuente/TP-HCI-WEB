@@ -69,6 +69,10 @@
         </v-btn>
       </v-card-actions>
     </v-card>
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.text }}
+    </v-snackbar>
   </v-dialog>
 </template>
 
@@ -99,6 +103,11 @@ const authStore = useAuthStore()
 const dialog = ref(props.modelValue)
 const valid = ref(false)
 const loading = ref(false)
+const snackbar = ref({
+  show: false,
+  text: '',
+  color: 'success'
+})
 const formRef = ref()
 
 const profileForm = reactive({
@@ -169,6 +178,9 @@ const handleSubmit = async () => {
     // Emitir evento de actualización exitosa
     emit('profileUpdated', updatedUser)
     
+    // Mostrar mensaje de éxito
+    snackbar.value = { show: true, text: 'Perfil actualizado exitosamente', color: 'success' }
+    
     // Cerrar modal
     dialog.value = false
     
@@ -180,9 +192,8 @@ const handleSubmit = async () => {
       errorMessage = error.message
     }
     
-    // Aquí podrías mostrar un snackbar o toast con el error
-    // Por ahora solo logueamos el error
-    alert(errorMessage)
+    // Mostrar mensaje de error
+    snackbar.value = { show: true, text: errorMessage, color: 'error' }
     
   } finally {
     loading.value = false
