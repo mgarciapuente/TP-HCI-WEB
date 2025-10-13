@@ -107,7 +107,7 @@ const isValidEmail = computed(() => {
 // Reglas de validación
 const emailRules = [
   (v: string) => !!v || 'El email es requerido',
-  (v: string) => isValidEmail.value || 'Ingresa un email válido'
+  (_v: string) => isValidEmail.value || 'Ingresa un email válido'
 ]
 
 // Métodos

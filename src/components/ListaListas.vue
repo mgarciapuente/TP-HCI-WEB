@@ -15,10 +15,10 @@ interface CreateList {
 }
 
 interface Props {
-    selectedList: { id: number; name: string; products: any[] } | null;
+    selectedList: ShoppingList | null;
     selectedPurchase?: { id: number; list?: any } | null;
-    listItems: { id: number; name: string; products: any[] }[];
-    handleSelectList?: (list: { id: number; name: string; products: any[] }) => void;
+    listItems: ShoppingList[];
+    handleSelectList?: (list: ShoppingList) => void;
     historyMode?: boolean;
 }
 
@@ -41,6 +41,12 @@ const listToDelete = ref<any>(null)
 const deleteModalRef = ref<any>(null)
 const snackbar = ref({ show: false, text: '', color: 'success' })
 
+// Helper para verificar si el usuario actual es propietario de una lista
+const isListOwner = (list: ShoppingList): boolean => {
+    if (!list.owner || !auth.user?.id) return true // Por defecto permitir si no hay información
+    return list.owner.id === auth.user.id
+}
+
 const getLists = async () => {
     if (!auth.token) return
     loading.value = true
@@ -50,15 +56,47 @@ const getLists = async () => {
         let res;
         if (props.historyMode) {
             // Obtener las compras y mapear a listas, preservando purchaseId para poder pedir la compra completa
-            const purchases = await purchasesService.getPurchases(auth.token, params);
-            res = purchases.map((p: any) => ({
+            const purchasesResponse = await purchasesService.getPurchases(auth.token, params);
+            // El servicio puede devolver diferentes estructuras, necesitamos manejarlas
+            let purchases: any[] = [];
+            
+            if (Array.isArray(purchasesResponse)) {
+                purchases = purchasesResponse;
+            } else if (purchasesResponse && typeof purchasesResponse === 'object') {
+                // Puede ser un objeto con paginación o estructura anidada
+                purchases = purchasesResponse.data || purchasesResponse.purchases || [];
+            }
+            
+            // Filtrar purchases: solo listas NO recurrentes (las recurrentes se auto-recrean)
+            const validPurchases = purchases.filter((p: any) => {
+                // Verificar que la purchase tenga una lista asociada
+                if (!p.list) return false
+                
+                // EXCLUIR listas recurrentes del historial
+                // Las listas recurrentes se auto-recrean, no necesitan restauración manual
+                if (p.list.recurring) return false;
+                
+                return true;
+            });
+            
+            res = validPurchases.map((p: any) => ({
                 ...(p.list || {}),
                 purchaseId: p.id,
                 productsCount: (p.items && Array.isArray(p.items) ? p.items.length : undefined) ?? ((p.list && Array.isArray(p.list.products)) ? p.list.products.length : undefined) ?? 0
             }));
         } else {
-            // Obtener las listas normalmente
+            // Obtener las listas normalmente (activas, no completadas)
             res = await listService.getLists(auth.token, params);
+            
+            // Si obtenemos un array de listas, filtrar las que no han sido completadas
+            if (Array.isArray(res)) {
+                // Filtrar listas que no tengan lastPurchasedAt (no han sido completadas)
+                res = res.filter((list: any) => {
+                    // Mostrar solo listas que no han sido compradas/completadas recientemente
+                    // o que sean recurrentes (que se auto-recrean)
+                    return !list.lastPurchasedAt || list.recurring;
+                });
+            }
         }
         // Manejar la respuesta que puede ser array directo o objeto con estructura
         if (Array.isArray(res)) {
@@ -131,6 +169,13 @@ const restoreList = async (purchase: any) => {
             }
         }
         emit('list-restored', restoredList)
+        
+        // Mostrar mensaje de éxito
+        snackbar.value = { 
+            show: true, 
+            text: 'Lista restaurada exitosamente', 
+            color: 'success' 
+        }
 
         // Refresh current view (still historyMode here). Parent will toggle history and refresh again.
         await getLists()
@@ -141,6 +186,13 @@ const restoreList = async (purchase: any) => {
 // Toggle de recurrencia
 const toggleRecurring = async (list: any) => {
     if (!auth.token) return
+    
+    // Solo el propietario puede cambiar si una lista es recurrente
+    if (!isListOwner(list)) {
+        snackbar.value = { show: true, text: 'Solo el propietario puede cambiar la configuración de recurrencia', color: 'error' }
+        return
+    }
+    
     try {
         await listService.updateList(auth.token, list.id, { recurring: !list.recurring })
         await getLists()
@@ -191,7 +243,7 @@ const handleDeleteConfirmed = async (list: any) => {
         snackbar.value = { show: true, text: 'Lista eliminada exitosamente', color: 'success' }
     } catch (err) {
         console.error('Error eliminando lista:', err)
-        snackbar.value = { show: true, text: 'Error al eliminar la lista', color: 'error' }
+        snackbar.value = { show: true, text: 'Error al eliminar la lista. Permisos insuficientes.', color: 'error' }
     } finally {
         if (deleteModalRef.value) deleteModalRef.value.finishLoading()
     }
@@ -331,7 +383,7 @@ onMounted(() => {
                         <p class="list-count">{{ (typeof list.productsCount === 'number' ? list.productsCount : (list.products?.length || 0)) || 'Sin' }} Productos</p>
                     </div>
                     <v-spacer />
-                    <v-btn v-if="!props.historyMode" :icon="list.recurring ? 'mdi-star' : 'mdi-star-outline'" variant="text" color="yellow" @click.stop="toggleRecurring(list)" :aria-label="list.recurring ? 'Quitar recurrencia' : 'Marcar como recurrente'" />
+                    <v-btn v-if="!props.historyMode && isListOwner(list)" :icon="list.recurring ? 'mdi-star' : 'mdi-star-outline'" variant="text" color="yellow" @click.stop="toggleRecurring(list)" :aria-label="list.recurring ? 'Quitar recurrencia' : 'Marcar como recurrente'" />
                     <v-btn v-if="!props.historyMode" icon="mdi-delete" variant="text" color="white" @click.stop="openDeleteModal(list)" />
                     <v-tooltip text="Restaurar lista" location="top">
                         <template v-slot:activator="{ props: tooltipProps }">

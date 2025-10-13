@@ -3,25 +3,19 @@ import ListaListas from '@/components/ListaListas.vue'
 import ListaProductos from '@/components/ListaProductos.vue'
 import ListaAgregarProductos from '@/components/ListaAgregarProductos.vue'
 import { VSnackbar } from 'vuetify/components'
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, type Ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { listService } from '@/services/listService'
-
-// Definir el tipo de lista
-interface Lista {
-  id: number
-  name: string
-  products: any[]
-}
+import type { ShoppingList } from '@/types/listTypes'
 
 interface Purchase {
   id: number
-  list: Lista
+  list: ShoppingList
   // otros campos relevantes de la compra
 }
 
-const selectedList = ref<Lista | null>(null) // Lista actualmente seleccionada
-const listItems = ref<Lista[]>([]) // Array que contendrá las listas
+const selectedList: Ref<ShoppingList | null> = ref(null)
+const listItems = ref<ShoppingList[]>([]) // Array que contendrá las listas
 const listasComponent = ref<any>(null)
 const listsCount = ref(0)
 const selectedPurchase = ref<Purchase | null>(null)
@@ -43,10 +37,12 @@ const onListCompleted = async (listId: number) => {
   try {
     await listService.purchaseList(auth.token, listId, { metadata: { auto: true } })
     snackbar.value = { show: true, text: 'Lista marcada como comprada y movida al historial', color: 'success' }
+    
     // Refrescar el panel de listas
     if (listasComponent.value && typeof listasComponent.value.refresh === 'function') {
       await listasComponent.value.refresh()
     }
+    
     // Si la lista seleccionada fue la completada, deseleccionarla
     if (selectedList.value && selectedList.value.id === listId) {
       selectedList.value = null
@@ -61,7 +57,7 @@ const handleSelect = (payload: { kind: 'list' | 'purchase', payload: any }) => {
   if (payload.kind === 'list') {
     // Selecting a normal list clears any selected purchase
     selectedPurchase.value = null
-    selectedList.value = payload.payload as Lista
+    selectedList.value = payload.payload as ShoppingList
   } else if (payload.kind === 'purchase') {
     console.log('Selected purchase from history:', payload.payload);
     // When a purchase is selected from history, clear selectedList and set selectedPurchase

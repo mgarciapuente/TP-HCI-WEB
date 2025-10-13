@@ -6,7 +6,7 @@ import { listService } from '@/services/listService'
 import { purchasesService } from '@/services/purchasesService'
 import CantidadModal from './CantidadModal.vue'
 import ShareListModal from './ShareListModal.vue'
-import type { ListItem } from '@/types/listTypes'
+import type { ListItem, ShoppingList } from '@/types/listTypes'
 
 const editItemModal = ref(false)
 const itemToEdit = ref<ListItem | null>(null)
@@ -42,7 +42,7 @@ const handleListShared = (email: string) => {
 }
 
 interface Props {
-    selectedList: { id: number; name: string; products?: any[] } | null;
+    selectedList: ShoppingList | null;
     selectedPurchase?: any | null;
     addProductMode: boolean;
     historyMode?: boolean;
@@ -77,6 +77,12 @@ const sortedItems = computed(() => {
     })
 })
 
+// Computed para verificar si el usuario actual es el propietario de la lista
+const isOwner = computed(() => {
+    if (!props.selectedList?.owner || !auth.user?.id) return true // Por defecto permitir edición si no hay información
+    return props.selectedList.owner.id === auth.user.id
+})
+
 const fetchItems = async () => {
     if (!auth.token) {
         items.value = []
@@ -109,6 +115,25 @@ const fetchItems = async () => {
                 // El endpoint devuelve array de items
                 const parsed = Array.isArray(res) ? res : (res && (res.items || res.data)) || []
                 items.value = parsed
+                
+                // Si la lista es recurrente y todos los items están comprados, resetearla automáticamente
+                if (props.selectedList.recurring && parsed.length > 0) {
+                    const allPurchased = parsed.every((item: any) => item.purchased === true)
+                    if (allPurchased) {
+                        try {
+                            await listService.resetList(auth.token, props.selectedList.id)
+                            // Volver a cargar los items después del reset
+                            const resetRes = await listService.getListItems(auth.token, props.selectedList.id, params)
+                            const resetParsed = Array.isArray(resetRes) ? resetRes : (resetRes && (resetRes.items || resetRes.data)) || []
+                            items.value = resetParsed
+                            
+                            // Mostrar mensaje informativo
+                            errorSnackbar.value = { show: true, text: 'Lista recurrente reseteada - lista para usar nuevamente' }
+                        } catch (resetErr) {
+                            console.error('Error al resetear lista recurrente:', resetErr)
+                        }
+                    }
+                }
             }
         }
     } catch (err) {
@@ -422,7 +447,7 @@ defineExpose({ refresh: fetchItems })
                         <template v-else>
                             <span>{{ props.historyMode ? props.selectedPurchase.name : props.selectedList?.name
                                 }}</span>
-                            <v-btn v-if="!props.historyMode && !editMode && props.selectedList" icon size="small"
+                            <v-btn v-if="!props.historyMode && !editMode && props.selectedList && isOwner" icon size="small"
                                 variant="text" @click="startEdit" aria-label="Editar lista">
                                 <v-icon>mdi-pencil</v-icon>
                             </v-btn>
