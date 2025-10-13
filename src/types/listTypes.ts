@@ -21,6 +21,7 @@ export interface ShoppingList {
     surname?: string
     email?: string
   }
+  sharedWith?: SharedUser[]
 }
 
 export interface ShoppingListUpdate {

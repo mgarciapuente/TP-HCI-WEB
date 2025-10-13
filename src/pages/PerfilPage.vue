@@ -1,6 +1,6 @@
 <template>
   <div class="perfil-page">
-    <h1 class="perfil-title">Perfil</h1>
+    <h2 class="perfil-title">Perfil</h2>
     <div>
       <UserProfile v-if="authStore.isLoggedIn" />
       <LoginForm v-else />
@@ -23,10 +23,7 @@ const authStore = useAuthStore()
 }
 
 .perfil-title {
-  margin: 0.5em 0.5em;
-  font-size: 2.5rem;
-  font-weight: 500;
-  color: #333;
-  text-align: center;
+  padding-left: 0.75em;
 }
+
 </style>

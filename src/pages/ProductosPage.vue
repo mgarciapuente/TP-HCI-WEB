@@ -2,7 +2,7 @@
   <div> 
     <div class="productos-page">
       <div class="page-header mb-6">
-        <h1 class="page-title">Productos</h1>
+        <h2 class="page-title">Productos</h2>
       </div>
 
       <div class="search-section mb-4">
@@ -223,6 +223,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.page-title {
+  padding-top: 1em;
+}
+
 .productos-page {
   height: 100%;
   display: flex;
@@ -237,14 +241,6 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 500;
-  color: #333;
-  padding: 8px 0;
-  margin: 0;
-}
-
 .search-section {
   width: 100%;
   margin: 0 auto 16px auto;
@@ -255,11 +251,6 @@ onMounted(() => {
 @media (min-width: 600px) {
   .productos-page {
     padding: 0 24px;
-  }
-  
-  .page-title {
-    font-size: 2rem;
-    padding: 12px 0;
   }
   
   .page-header {
@@ -276,11 +267,6 @@ onMounted(() => {
     padding: 0 32px;
   }
   
-  .page-title {
-    font-size: 2.25rem;
-    padding: 16px 0;
-  }
-  
   .page-header {
     margin-bottom: 24px;
   }
@@ -293,11 +279,6 @@ onMounted(() => {
 @media (min-width: 1264px) {
   .productos-page {
     padding: 0 40px;
-  }
-  
-  .page-title {
-    font-size: 2.5rem;
-    padding: 20px 0;
   }
 }
 

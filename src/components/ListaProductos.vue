@@ -456,7 +456,7 @@ defineExpose({ refresh: fetchItems })
                 </div>
                 <div class="header-right">
                     <v-btn 
-                        v-if="!props.historyMode && props.selectedList"
+                        v-if="!props.historyMode && !editMode && props.selectedList && isOwner"
                         icon 
                         variant="text" 
                         color="primary"
