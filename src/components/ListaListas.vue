@@ -224,10 +224,23 @@ onMounted(() => {
 }
 
 .lists-header {
+    margin: 1em 0 1em 0.25em;
+}
+
+.header-normal {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 1em 0 1em 0.25em;
+}
+
+.header-with-back {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.back-button {
+    margin-left: -8px;
 }
 
 .list-item {
@@ -281,10 +294,19 @@ onMounted(() => {
 
     <div class="lists-panel">
         <div class="lists-header">
-            <h2 class="panel-title">{{ props.historyMode ? 'Historial' : 'Listas' }}</h2>
-            <v-btn icon="mdi-history" color="black" variant="text" class="history-button" @click="emit('toggle-history')">
-                <v-icon>mdi-history</v-icon>
-            </v-btn>
+            <div v-if="props.historyMode" class="header-with-back">
+                <v-btn icon variant="text" color="black" @click="emit('toggle-history')" class="back-button">
+                    <v-icon>mdi-arrow-left</v-icon>
+                </v-btn>
+                <h2 class="panel-title">Historial</h2>
+            </div>
+            <div v-else class="header-normal">
+                <h2 class="panel-title">Listas</h2>
+                <v-btn variant="text" color="black" class="history-button" @click="emit('toggle-history')">
+                    <v-icon start>mdi-history</v-icon>
+                    Historial
+                </v-btn>
+            </div>
         </div>
         <div v-if="loading" class="d-flex justify-center py-8">
             <v-progress-circular color="secondary" indeterminate size="36" />
@@ -311,7 +333,11 @@ onMounted(() => {
                     <v-spacer />
                     <v-btn v-if="!props.historyMode" :icon="list.recurring ? 'mdi-star' : 'mdi-star-outline'" variant="text" color="yellow" @click.stop="toggleRecurring(list)" :aria-label="list.recurring ? 'Quitar recurrencia' : 'Marcar como recurrente'" />
                     <v-btn v-if="!props.historyMode" icon="mdi-delete" variant="text" color="white" @click.stop="openDeleteModal(list)" />
-                    <v-btn v-if="props.historyMode" icon="mdi-backup-restore" variant="text" color="white" @click.stop="restoreList(list)" />
+                    <v-tooltip text="Restaurar lista" location="top">
+                        <template v-slot:activator="{ props: tooltipProps }">
+                            <v-btn v-if="props.historyMode" v-bind="tooltipProps" icon="mdi-backup-restore" variant="text" color="white" @click.stop="restoreList(list)" />
+                        </template>
+                    </v-tooltip>
                 </v-card-text>
             </v-card>
         </div>

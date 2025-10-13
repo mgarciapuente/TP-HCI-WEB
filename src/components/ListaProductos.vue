@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import CategoryFilters from './CategoryFilters.vue'
 import { useAuthStore } from '@/stores/auth'
 import { listService } from '@/services/listService'
@@ -66,6 +66,16 @@ const saveLoading = ref(false)
 const loading = ref(false)
 const selectedCategoryId = ref<number | null>(null)
 const errorSnackbar = ref({ show: false, text: '' })
+
+// Computed para ordenar productos: no comprados primero, luego comprados
+const sortedItems = computed(() => {
+    return [...items.value].sort((a, b) => {
+        // Si ambos tienen el mismo estado de compra, mantener el orden original
+        if (a.purchased === b.purchased) return 0
+        // Los no comprados (false) van primero, los comprados (true) van al final
+        return a.purchased ? 1 : -1
+    })
+})
 
 const fetchItems = async () => {
     if (!auth.token) {
@@ -444,7 +454,7 @@ defineExpose({ refresh: fetchItems })
             </div>
 
             <div v-else class="products-list">
-                <v-card v-for="product in items" :key="product.id" class="product-item mb-2" variant="flat"
+                <v-card v-for="product in sortedItems" :key="product.id" class="product-item mb-2" variant="flat"
                     color="backgroundColor"
                     :class="{ 'item-deleted': itemsToDelete.includes(product.id), 'item-purchased': (!props.historyMode && product.purchased) }">
                     <v-card-text class="product-content">
