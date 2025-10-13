@@ -11,6 +11,10 @@
           Comparte "<strong>{{ listName }}</strong>" con otra persona ingresando su email.
           Podrá agregar y eliminar productos de la lista.
         </p>
+        <p class="text-body-2 text-grey-darken-2 mb-3">
+          <v-icon size="16" class="me-1">mdi-information</v-icon>
+          <em>Nota: El usuario debe tener una cuenta registrada en el sistema.</em>
+        </p>
 
         <v-text-field
           v-model="email"
@@ -23,6 +27,7 @@
           density="comfortable"
           @keyup.enter="handleShare"
           @input="clearError"
+          @focus="clearError"
         />
 
         <v-alert
@@ -137,15 +142,21 @@ const handleShare = async () => {
   } catch (error: any) {
     console.error('Error al compartir lista:', error)
     
-    // Manejo de errores específicos
-    if (error.status === 404) {
-      errorMessage.value = 'El email ingresado no está registrado en el sistema'
-    } else if (error.status === 400) {
-      errorMessage.value = 'No se puede compartir la lista. Verifica los datos ingresados'
-    } else if (error.status === 401) {
-      errorMessage.value = 'No tienes permisos para compartir esta lista'
+    // Manejo de errores específicos basado en el código de estado HTTP
+    if (error.code === 404 || error.status === 404) {
+      errorMessage.value = `El email "${email.value}" no está registrado en el sistema. La persona debe crear una cuenta primero.`
+    } else if (error.code === 400 || error.status === 400) {
+      errorMessage.value = 'No se puede compartir la lista. Verifica que el email esté escrito correctamente.'
+    } else if (error.code === 401 || error.status === 401) {
+      errorMessage.value = 'No tienes permisos para compartir esta lista.'
+    } else if (error.code === 409 || error.status === 409) {
+      errorMessage.value = 'Esta lista ya está compartida con este usuario.'
+    } else if (error.code === 403 || error.status === 403) {
+      errorMessage.value = 'No puedes compartir la lista contigo mismo.'
     } else {
-      errorMessage.value = 'Error al compartir la lista. Intenta nuevamente'
+      // Usar el mensaje del servidor si está disponible, o mensaje genérico
+      const serverMessage = error.message || error.response?.data?.message
+      errorMessage.value = serverMessage || 'Error al compartir la lista. Intenta nuevamente.'
     }
   } finally {
     loading.value = false

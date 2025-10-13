@@ -50,6 +50,40 @@
       @product-updated="handleProductUpdated"
     />
 
+    <!-- Modal de confirmación de eliminación -->
+    <v-dialog v-model="showDeleteModal" max-width="400" persistent>
+      <v-card>
+        <v-card-title class="d-flex align-center pa-4">
+          <v-icon start color="#d32f2f">mdi-delete-alert</v-icon>
+          Confirmar Eliminación
+        </v-card-title>
+        
+        <v-card-text class="pa-4">
+          <p class="text-body-1 mb-0">
+            ¿Estás seguro de que quieres eliminar 
+            <strong>"{{ productToDelete?.name }}"</strong>?
+          </p>
+          <p class="text-body-2 text-medium-emphasis mt-2">
+            Esta acción no se puede deshacer.
+          </p>
+        </v-card-text>
+
+        <v-card-actions class="pa-4">
+          <v-spacer />
+          <v-btn @click="cancelDeleteProduct" variant="outlined">
+            Cancelar
+          </v-btn>
+          <v-btn 
+            @click="confirmDeleteProduct"
+            color="error"
+            variant="elevated"
+          >
+            Eliminar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
       {{ snackbar.text }}
     </v-snackbar>
@@ -83,6 +117,10 @@ const showAddModal = ref(false)
 const showEditModal = ref(false)
 const selectedProduct = ref<Product | null>(null)
 const snackbar = ref({ show: false, text: '', color: 'success' })
+
+// Modal de confirmación de eliminación
+const showDeleteModal = ref(false)
+const productToDelete = ref<Product | null>(null)
 
 // Métodos
 const loadProducts = async (resetPage = false) => {
@@ -137,18 +175,30 @@ const handleEditProduct = (product: Product) => {
   showEditModal.value = true
 }
 
-const handleDeleteProduct = async (product: Product) => {
-  try {
-    const confirmed = confirm(`¿Estás seguro de que quieres eliminar "${product.name}"?`)
-    if (!confirmed) return
+const handleDeleteProduct = (product: Product) => {
+  productToDelete.value = product
+  showDeleteModal.value = true
+}
 
-    await productsService.deleteProduct(product.id, authStore.token || undefined)
+const confirmDeleteProduct = async () => {
+  if (!productToDelete.value) return
+  
+  try {
+    await productsService.deleteProduct(productToDelete.value.id, authStore.token || undefined)
     
+    showDeleteModal.value = false
+    productToDelete.value = null
     await loadProducts()
+    snackbar.value = { show: true, text: 'Producto eliminado exitosamente', color: 'success' }
   } catch (error) {
     console.error('Error al eliminar producto:', error)
     snackbar.value = { show: true, text: 'Error al eliminar el producto. Por favor intenta de nuevo.', color: 'error' }
   }
+}
+
+const cancelDeleteProduct = () => {
+  showDeleteModal.value = false
+  productToDelete.value = null
 }
 
 const openAddProductModal = () => {
@@ -252,11 +302,11 @@ onMounted(() => {
 }
 
 .search-input {
-  border-radius: 12px;
+  border-radius: var(--border-radius-md);
 }
 
 :deep(.v-field--variant-outlined .v-field__outline) {
-  border-radius: 12px;
+  border-radius: var(--border-radius-md);
 }
 
 .fab-inside-card {
@@ -292,13 +342,13 @@ onMounted(() => {
   /* El "track" por donde se desliza */
   ::-webkit-scrollbar-track {
     background: #f1f1f1;
-    border-radius: 10px;
+    border-radius: var(--border-radius-sm);
   }
 
   /* La parte que se arrastra */
   ::-webkit-scrollbar-thumb {
     background: #c1c1c1;
-    border-radius: 10px;
+    border-radius: var(--border-radius-sm);
     border: 2px solid #f1f1f1;
   }
 

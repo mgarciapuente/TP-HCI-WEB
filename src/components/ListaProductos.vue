@@ -54,6 +54,7 @@ const emit = defineEmits<{
     (e: 'exit-add-mode'): void
     (e: 'enter-add-mode'): void
     (e: 'list-renamed', payload: { id: number, name: string }): void
+    (e: 'deselect-list'): void
 }>()
 
 const auth = useAuthStore()
@@ -287,7 +288,7 @@ defineExpose({ refresh: fetchItems })
     display: flex;
     flex-direction: row;
     background-color: rgba(var(--v-theme-on-surface), 0.06) !important;
-    border-radius: 12px;
+    border-radius: var(--border-radius-md);
     transition: background-color 0.15s ease;
     padding: 1em 2em;
     /* slightly more lateral spacing */
@@ -387,6 +388,9 @@ defineExpose({ refresh: fetchItems })
             <div class="header-top">
                 <div class="header-left">
                     <v-btn v-if="props.addProductMode" icon @click="emit('exit-add-mode')">
+                        <v-icon>mdi-arrow-left</v-icon>
+                    </v-btn>
+                    <v-btn v-else-if="props.selectedList && !props.historyMode" icon @click="emit('deselect-list')">
                         <v-icon>mdi-arrow-left</v-icon>
                     </v-btn>
                     <h2 class="panel-title" style="display: flex; align-items: center; gap: 8px;">

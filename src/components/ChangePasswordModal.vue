@@ -2,7 +2,7 @@
   <v-dialog v-model="dialog" max-width="500" persistent>
     <v-card>
       <v-card-title class="d-flex align-center pa-4">
-        <v-icon start color="#465D46">mdi-lock-reset</v-icon>
+        <v-icon start color="secondary">mdi-lock-reset</v-icon>
         Cambiar Contraseña
       </v-card-title>
       
@@ -65,11 +65,11 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
-      {{ snackbar.text }}
-    </v-snackbar>
   </v-dialog>
+
+  <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+    {{ snackbar.text }}
+  </v-snackbar>
 </template>
 
 <script setup lang="ts">
@@ -203,8 +203,3 @@ const handleSubmit = async () => {
 }
 </script>
 
-<style scoped>
-.v-card-title {
-  background-color: rgba(70, 93, 70, 0.1);
-}
-</style>

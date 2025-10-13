@@ -233,7 +233,7 @@ onMounted(() => {
 .list-item {
     margin-bottom: 1em;
     cursor: pointer;
-    border-radius: 20px;
+    border-radius: var(--border-radius-lg);
     border-width: 3px;
     border-style: solid;
     border-color: transparent;

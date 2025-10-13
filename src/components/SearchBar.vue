@@ -60,6 +60,6 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .search-input {
-  border-radius: 12px;
+  border-radius: var(--border-radius-md);
 }
 </style>

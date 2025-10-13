@@ -92,7 +92,7 @@ const confirmAdd = async () => {
         snackbar.value = { show: true, text: 'Producto agregado a la lista', color: 'success' }
     } catch (err) {
         console.error('Error agregando producto a la lista:', err)
-        snackbar.value = { show: true, text: 'No se pudo agregar el producto', color: 'error' }
+        snackbar.value = { show: true, text: 'No se pudo agregar el producto. Ya existe en la lista.', color: 'error' }
     }
 }
 

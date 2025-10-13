@@ -318,7 +318,7 @@ onMounted(() => {
 
 .category-scroll-container::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
+  border-radius: var(--border-radius-sm);
 }
 
 .category-scroll-container::-webkit-scrollbar-thumb:hover {
@@ -339,7 +339,7 @@ onMounted(() => {
   max-height: 32px !important;
   background-color: rgba(255, 255, 255, 0.9) !important;
   border: 1px solid #ddd !important;
-  border-radius: 16px !important;
+  border-radius: var(--border-radius-md) !important;
   margin: 0 4px !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
   align-self: center !important;

@@ -186,7 +186,7 @@ const handlePasswordReset = () => {
   width: 100%;
   max-width: 550px;
   padding: 2.5em;
-  border-radius: 16px;
+  border-radius: var(--border-radius-lg);
   background-color: rgba(255,255,255,0.95);
   box-shadow: 0 8px 32px rgba(70, 93, 70, 0.15) !important;
   margin: auto;

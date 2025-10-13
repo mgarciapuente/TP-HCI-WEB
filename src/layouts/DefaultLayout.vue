@@ -45,7 +45,7 @@ import NavigationBar from '../components/NavigationBar.vue'
   box-sizing: border-box;
   position: relative;
   background-color: rgb(var(--v-theme-surface));
-  border-radius: 12px;
+  border-radius: var(--border-radius-md);
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;

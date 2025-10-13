@@ -84,7 +84,7 @@ const deleteProduct = () => {
 
 <style scoped>
 .product-card {
-  border-radius: 12px;
+  border-radius: var(--border-radius-md);
   background-color: white;
 }
 

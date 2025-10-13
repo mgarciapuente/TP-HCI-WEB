@@ -164,6 +164,13 @@ const toggleHistory = async () => {
   }
 }
 
+const deselectList = () => {
+  selectedList.value = null
+  selectedPurchase.value = null
+  // Asegurar que no estamos en modo agregar productos
+  addProductMode.value = false
+}
+
 
 </script>
 
@@ -182,7 +189,7 @@ const toggleHistory = async () => {
       @toggle-history="toggleHistory" ref="listasComponent" @count-changed="(n) => listsCount = n" @list-restored="handleListRestored" @select="handleSelect" :historyMode="showHistory" />
 
     <ListaProductos v-if="selectedList || selectedPurchase" ref="productosComponent" :selectedList="selectedList"
-      :selectedPurchase="selectedPurchase" :addProductMode="addProductMode" :historyMode="showHistory" @exit-add-mode="exitAddMode" @enter-add-mode="enterAddMode" @category-changed="handleCategoryChanged" @list-completed="onListCompleted" @list-renamed="({ id, name }) => { if (selectedList && selectedList.id === id) { selectedList.name = name } if (listasComponent?.refresh) { listasComponent.refresh() } }" />
+      :selectedPurchase="selectedPurchase" :addProductMode="addProductMode" :historyMode="showHistory" @exit-add-mode="exitAddMode" @enter-add-mode="enterAddMode" @category-changed="handleCategoryChanged" @list-completed="onListCompleted" @deselect-list="deselectList" @list-renamed="({ id, name }) => { if (selectedList && selectedList.id === id) { selectedList.name = name } if (listasComponent?.refresh) { listasComponent.refresh() } }" />
 
     <ListaAgregarProductos v-if="addProductMode" :selectedList="selectedList" :addProductMode="addProductMode"
       :selectedCategoryId="selectedCategoryId" @add-product="onProductAdded" />
